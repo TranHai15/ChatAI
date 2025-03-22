@@ -1,0 +1,15 @@
+.admin-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.admin-body {
+  display: flex;
+}
+.admin-body > .Main {
+  width: calc(100% - 17%);
+}
+.admin-body > .Sidebar {
+  flex: 1;
+}

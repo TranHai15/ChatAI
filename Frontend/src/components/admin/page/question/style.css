@@ -1,0 +1,11 @@
+.limit-lines {
+  display: -webkit-box; /* Dùng cho chế độ multi-line */
+  -webkit-box-orient: vertical; /* Chỉ định hướng dọc cho box */
+  -webkit-line-clamp: 2; /* Giới hạn số dòng là 4 */
+  overflow: hidden; /* Ẩn phần nội dung vượt quá giới hạn */
+  text-overflow: ellipsis; /* Thêm dấu "..." nếu có văn bản bị cắt */
+  line-height: 1.9;
+}
+/* td {
+  border: none !important;
+} */

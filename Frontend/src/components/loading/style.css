@@ -1,0 +1,40 @@
+/* src/components/LoadingBee.css */
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f9f6ff; /* Màu nền dịu */
+  overflow: hidden;
+}
+.loading-container > img {
+  mix-blend-mode: multiply; /* Chế độ hòa trộn */
+}
+.loading-bee {
+  width: 70px; /* Kích thước chú ong */
+  object-fit: contain;
+  animation: fly 2s ease-in-out infinite; /* Animation bay */
+}
+
+.loading-text {
+  margin-top: 20px;
+  font-size: 18px;
+  color: #6b47dc;
+  font-weight: bold;
+  font-family: "Comic Sans MS", cursive;
+}
+
+/* Animation bay */
+@keyframes fly {
+  0% {
+    transform: translateX(-50px) translateY(0);
+  }
+  50% {
+    transform: translateX(50px) translateY(-20px);
+  }
+  100% {
+    transform: translateX(-50px) translateY(0);
+  }
+}

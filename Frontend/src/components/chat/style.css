@@ -1,0 +1,70 @@
+.containers {
+  display: flex;
+  background-color: rgb(250, 250, 250);
+  /* background-color: #777; */
+}
+.content {
+  width: calc(100% - 20%);
+  min-width: calc(100% - 16rem);
+  height: 100vh;
+}
+.content__is {
+  width: 100%;
+  height: 100vh;
+}
+main {
+  height: calc(100vh - 7rem);
+}
+.sidebar {
+  min-width: 16rem;
+  width: 20%;
+  height: 100vh;
+}
+.header_none {
+  display: none;
+}
+@media screen and (max-width: 639px) {
+  .containers {
+    gap: 0;
+  }
+  .header_none {
+    display: block;
+  }
+  .sidebar {
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    right: 10%;
+    background-color: #fff;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+    width: 80%;
+  }
+
+  .content {
+    width: 100%;
+    height: 100vh;
+  }
+  .container__message {
+    padding: 0 20px;
+  }
+  .inputress {
+    width: 88%;
+  }
+}
+
+@media screen and (min-width: 640px) and (max-width: 800px) {
+  /* Các kiểu CSS cho màn hình trung bình */
+  .sidebar {
+    height: 100vh;
+  }
+}
+@media screen and (min-width: 801px) and (max-width: 1023px) {
+  .container__message {
+    padding: 0 5%;
+  }
+  .inputress {
+    width: 90%;
+  }
+}

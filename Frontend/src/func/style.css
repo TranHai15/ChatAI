@@ -1,0 +1,61 @@
+/* CSS chung cho thông báo */
+.notification {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  background-color: #007bff; /* Màu mặc định (info) */
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  animation: fadeIn 0.5s ease-in-out, fadeOut 0.5s ease-in-out 3.5s;
+  /* fadeOut bắt đầu sau 3.5s */
+}
+
+/* Hiệu ứng ẩn */
+.notification.hide {
+  animation: fadeOut 0.5s ease-in-out forwards;
+}
+
+/* Màu cho các loại thông báo */
+.notification.success {
+  background-color: #28a745;
+}
+
+.notification.error {
+  background-color: #dc3545;
+}
+
+.notification.warning {
+  background-color: #ffc107;
+}
+
+.notification.info {
+  background-color: #17a2b8;
+}
+
+/* Hiệu ứng nở ra (fade-in) */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Hiệu ứng co lại (fade-out) */
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+}

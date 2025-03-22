@@ -1,0 +1,15 @@
+.input__mess::placeholder {
+  color: #666;
+  font-size: 15px;
+}
+.input__mess {
+  height: 45px;
+  padding-top: 10px;
+  box-shadow: 0px 0px 2px 0px gray;
+  line-height: 1.6;
+  padding-bottom: 4px;
+}
+.inputress {
+  width: 70%;
+  margin: 0 auto;
+}

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- Đường viền bao bọc bên ngoài -->
+  <circle cx="60" cy="60" r="50" fill="none" stroke="black" stroke-width="2"/>
+
+  <!-- Thân con ong -->
+  <circle cx="60" cy="60" r="12" fill="none" stroke="black" stroke-width="2"/>
+
+  <!-- Cánh con ong bên trái -->
+  <path d="M50,55 C40,45 30,40 30,55 C30,70 40,65 50,55" fill="none" stroke="black" stroke-width="2"/>
+  
+  <!-- Cánh con ong bên phải -->
+  <path d="M70,55 C80,45 90,40 90,55 C90,70 80,65 70,55" fill="none" stroke="black" stroke-width="2"/>
+  
+  <!-- Đầu con ong -->
+  <circle cx="60" cy="40" r="8" fill="none" stroke="black" stroke-width="2"/>
+  
+  <!-- Mắt con ong -->
+  <circle cx="56" cy="37" r="2" fill="none" stroke="black" stroke-width="2"/>
+  <circle cx="64" cy="37" r="2" fill="none" stroke="black" stroke-width="2"/>
+  
+  <!-- Sọc của con ong -->
+  <path d="M55,52 C60,57 65,57 70,52" fill="none" stroke="black" stroke-width="2"/>
+  <path d="M55,57 C60,62 65,62 70,57" fill="none" stroke="black" stroke-width="2"/>
+  <path d="M55,62 C60,67 65,67 70,62" fill="none" stroke="black" stroke-width="2"/>
+  
+  <!-- Râu con ong -->
+  <path d="M56,33 C52,30 50,25 46,22" fill="none" stroke="black" stroke-width="2"/>
+  <path d="M64,33 C68,30 70,25 74,22" fill="none" stroke="black" stroke-width="2"/>
+</svg>

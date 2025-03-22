@@ -1,0 +1,58 @@
+/* Thêm font chữ đồng bộ (Ví dụ sử dụng Google Fonts) */
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
+
+.admin-sidebar {
+  width: 250px;
+
+  background-color: #2f3b52;
+  height: 100vh;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  padding-top: 20px;
+  font-family: "Roboto", sans-serif;
+  color: #fff;
+}
+
+.admin-sidebar ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.admin-sidebar li {
+  margin-left: 10px;
+  margin-right: 20px;
+  margin-bottom: 15px;
+}
+
+.admin-sidebar .active-link {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 10px;
+  border-radius: 5px;
+  font-weight: 500;
+  display: block;
+  text-decoration: none;
+}
+
+.admin-sidebar .inactive-link {
+  color: #b8c2cc;
+  padding: 10px 10px;
+  display: block;
+  text-decoration: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.admin-sidebar .inactive-link:hover {
+  background-color: #3b4d6e;
+  color: #fff;
+}
+
+.admin-sidebar .admin-sidebar ul li:last-child {
+  margin-top: auto;
+}
+
+.admin-sidebar .admin-sidebar ul li a:hover,
+.admin-sidebar .admin-sidebar ul li .active-link:hover {
+  background-color: #0056b3;
+}
