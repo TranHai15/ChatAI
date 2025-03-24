@@ -167,7 +167,7 @@ const Nof = () => {
               <tbody>
                 {currentItems.length > 0 ? (
                   currentItems.map((notif, index) => (
-                    <tr key={notif.id} className="text-center">
+                    <tr key={index} className="text-center">
                       <td className="border px-4 py-2">{notif.user_id}</td>
                       <td className="border px-4 py-2 min-w-80 max-w-96 overflow-hidden">
                         {notif.task}

@@ -62,28 +62,28 @@ export default function Login() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-4">
             <label
-              htmlFor="email"
+              htmlFor="username"
               className="block text-sm font-medium text-gray-700"
             >
-              Email
+              Username
             </label>
             <input
-              type="email"
-              id="email"
-              {...register("email", {
-                required: "Vui lòng nhập Email",
-                pattern: {
-                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-                  message: "Email không đúng định dạng"
+              type="text"
+              id="username"
+              {...register("username", {
+                required: "Vui lòng nhập Username",
+                minLength: {
+                  value: 6,
+                  message: "Username phải có ít nhất 6 ký tự"
                 }
               })}
-              placeholder="Enter your email"
+              placeholder="Enter your username"
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            {backendError.email ? (
-              <p className="text-red-500 text-sm">{backendError.email}</p>
-            ) : errors.email ? (
-              <p className="text-red-500 text-sm">{errors.email.message}</p>
+            {backendError.username ? (
+              <p className="text-red-500 text-sm">{backendError.username}</p>
+            ) : errors.username ? (
+              <p className="text-red-500 text-sm">{errors.username.message}</p>
             ) : null}
           </div>
           <div className="mb-6">
@@ -114,12 +114,12 @@ export default function Login() {
           </button>
         </form>
 
-        <Link
+        {/* <Link
           to={"/signup"}
           className="text-blue-500 text-sm mt-4 inline-block"
         >
           Sign Up
-        </Link>
+        </Link> */}
       </div>
     </div>
   );

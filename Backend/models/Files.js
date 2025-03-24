@@ -247,20 +247,6 @@ class fileModel {
       }
     });
 
-    console.log(
-      "🚀 ~ fileModel ~ processFilesAndConvertPDF ~ pdfFiles:",
-      pdfFiles
-      // id
-    );
-    console.log(
-      "🚀 ~ fileModel ~ processFilesAndConvertPDF ~ xlsxFiles:",
-      xlsxFiles
-    );
-    console.log(
-      "🚀 ~ fileModel ~ processFilesAndConvertPDF ~ txtFiles:",
-      txtFiles
-    );
-
     // Xử lý file .xlsx và .xls
     if (xlsxFiles.length > 0) {
       for (const file of xlsxFiles) {
@@ -589,7 +575,6 @@ class fileModel {
       const [result] = await user.connection.execute(param);
       // console.log("🚀 ~ fileModel ~ GetFileANDSenFile ~ result:", result);
       const res = await fileModel.processFiles(result);
-      console.log("🚀 ~ fileModel ~ GetFileANDSenFile ~ res:", res);
       if (res.status == true) {
         console.log("Quá trình xử lý hoàn tất!");
         return { status: true };
@@ -729,7 +714,7 @@ class fileModel {
           }
         }
       );
-      console.log("🚀 ~ fileModel ~ sendFiles ~ response:", response);
+
       if (response.status === 200 || response.status === 201) {
         console.log("📤 File gửi thành công!", response.data);
         return { status: true };

@@ -34,20 +34,15 @@ const authController = {
     }
   },
   registerUserAdmin: async (req, res) => {
-    const { name, username, email, password, role, phong_ban } = req.body;
-    console.log("🚀 ~ registerUser: ~ name:", name);
-    console.log("🚀 ~ registerUser: ~ phong_ban:", phong_ban);
-    console.log("🚀 ~ registerUser: ~ role:", role);
-    console.log("🚀 ~ registerUser: ~ password:", password);
-    console.log("🚀 ~ registerUser: ~ email:", email);
-    console.log("🚀 ~ registerUser: ~ username:", username);
+    const { name, username, password, role, phong_ban, oldPassword } = req.body;
+    console.log("🚀 ~ registerUserAdmin: ~ oldPassword:", oldPassword);
 
-    if (!email || !password || !username) {
-      return res.status(400).json("Tên, email và mật khẩu là bắt buộc.");
+    if (!password || !username) {
+      return res.status(400).json("Tên, và mật khẩu là bắt buộc.");
     }
 
     try {
-      const emailExists = await User.checkEmailExists(email);
+      const emailExists = await User.checkEmailExists(username);
       if (emailExists) {
         return res.status(400).json("Email đã được sử dụng.");
       }
@@ -58,7 +53,6 @@ const authController = {
       const userId = await User.insertUseradmin(
         name,
         username,
-        email,
         hashedPassword,
         role,
         phong_ban
@@ -96,9 +90,9 @@ const authController = {
 
   // Phương thức đăng nhập
   loginUser: async (req, res) => {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
-    if (!email || !password) {
+    if (!username || !password) {
       return res.status(400).json({
         All: "Email và mật khẩu là bắt buộc.",
         email: "",
@@ -107,27 +101,25 @@ const authController = {
     }
 
     try {
-      const user = await User.checkEmailExists(email, true);
-
+      const user = await User.checkEmailExists(username, true);
       if (!user) {
         return res.status(400).json({
           All: "",
-          email: "Email không tồn tại.",
+          username: "username không tồn tại.",
           password: ""
         });
       }
-
       const isPasswordValid = await bcryptjs.compare(password, user.password);
-
       if (!isPasswordValid) {
         return res.status(401).json({
           All: "",
-          email: "",
+          username: "",
           password: "Mật khẩu sai"
         });
       }
 
       const session = await User.getSessionByUserId(user.id, true);
+
       let accessToken, refreshToken;
 
       if (session.length > 0) {
@@ -141,14 +133,15 @@ const authController = {
         const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
         await User.insertSession(user.id, accessToken, refreshToken, expiresAt);
       }
-      // console.log("accetoken", accessToken);
-      // res.cookie("refreshToken", refreshToken, {
-      //   secure: false,
-      //   path: "/",
-      //   sameSite: "Strict",
-      // });
-      // console.log(user);
-      const { password: pwd, role_id, email: userEmail, ...userData } = user;
+
+      const {
+        password: pwd,
+        role_id,
+        update_at,
+        create_at,
+        email,
+        ...userData
+      } = user;
 
       // console.log({ userData });
       res.status(200).json({

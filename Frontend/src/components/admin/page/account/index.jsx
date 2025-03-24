@@ -22,7 +22,7 @@ const Account = () => {
     const fetchUsers = async () => {
       const res = await axiosClient.get("/user/");
       setUsers(res.data);
-      console.log("🚀 ~ fetchUsers ~ res.data:", res.data);
+
       setFilteredUsers(res.data);
     };
 
@@ -126,7 +126,7 @@ const Account = () => {
               onChange={(e) => setFilters({ ...filters, name: e.target.value })}
               className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <input
+            {/* <input
               type="text"
               placeholder="Tìm theo email"
               value={filters.email}
@@ -134,7 +134,7 @@ const Account = () => {
                 setFilters({ ...filters, email: e.target.value })
               }
               className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            /> */}
             <input
               type="text"
               placeholder="Tìm theo Phòng Ban"
@@ -183,9 +183,9 @@ const Account = () => {
               <tr className="bg-gray-200">
                 <th className="p-3 border">#</th>
                 <th className="p-3 border">Tên</th>
-                <th className="p-3 border">Email</th>
-                <th className="p-3 border">Phân quyền</th>
                 <th className="p-3 border">Phòng Ban</th>
+                <th className="p-3 border">Phân quyền</th>
+                <th className="p-3 border">Ngày Tạo</th>
                 <th className="p-3 border">Hành động</th>
               </tr>
             </thead>
@@ -196,13 +196,14 @@ const Account = () => {
                   <td className="p-3 border max-w-32 overflow-hidden ">
                     {user.fullname}
                   </td>
-                  <td className="p-3 border max-w-52 overflow-hidden">
-                    {user.email}
-                  </td>
+                  <td className="p-3 border">{user.phong_ban}</td>
+
                   <td className="p-3 border max-w-8 overflow-hidden">
                     {user.role_id === 1 ? "Admin" : "User"}
                   </td>
-                  <td className="p-3 border">{user.phong_ban}</td>
+                  <td className="p-3 border max-w-52 overflow-hidden">
+                    {user.create_at}
+                  </td>
                   <td className="p-3 border">
                     <button
                       onClick={() => handelEdit(user.id)}

@@ -9,47 +9,33 @@ import { jwtDecode } from "jwt-decode"; // Not
 
 export default function Admin() {
   const Navigator = useNavigate();
-  const { isLogin } = useContext(AuthContext);
+  const { isLogin, isRole, Navigate, Location, token } =
+    useContext(AuthContext);
   useEffect(() => {
     const checkLoginStatus = () => {
       try {
-        const activeUser = JSON.parse(localStorage.getItem("active"));
-        // console.log("🚀 ~ checkLoginStatus ~ activeUser:", activeUser);
-
-        if (activeUser && activeUser.isLogin) {
-          // setInforUser(activeUser);
-          // setIsLogin(true);
-
-          // Decode JWT token để lấy thông tin role
-          const token = activeUser.dataLogin?.accessToken;
+        if (isLogin && isRole !== null) {
           if (token) {
             const decoded = jwtDecode(token);
-            // console.log("🚀 ~ checkLoginStatus ~ decoded:", decoded);
             const { role_id } = decoded;
-            // console.log("🚀 ~ checkLoginStatus ~ role:", role_id);
-            // setIsRole(role_id);
             if (role_id === 1) {
               return;
             } else {
-              Navigator("/");
+              Navigate("/login");
             }
           }
         } else {
-          // setIsLogin(false);
-          // setInforUser({});
-          // setIsRole(-1);
-          Navigator("/");
+          Navigator("/login");
         }
       } catch (error) {
         console.error("Error decoding token:", error);
-        // setIsLogin(false); // Đảm bảo trạng thái chính xác khi gặp lỗi
       } finally {
         // console.log("message");
       }
     };
 
     checkLoginStatus();
-  }, [isLogin, Navigator]);
+  }, [isLogin, Location.pathname]);
 
   // console.log("islogoin", isLogin);
   // console.log("isRole", isRole);

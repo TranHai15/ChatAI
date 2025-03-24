@@ -115,22 +115,28 @@ const dataController = {
       const {
         username,
         fullname,
-        email,
         password,
         role,
         phong_ban,
         createdAt,
+        oldPassword,
         id
       } = req.body;
-      const salt = await bcryptjs.genSalt(10);
-      const hashedPassword = await bcryptjs.hash(password, salt);
+
+      let pass = "";
+      if (password === oldPassword) {
+        pass = oldPassword;
+      } else {
+        const salt = await bcryptjs.genSalt(10);
+        pass = await bcryptjs.hash(password, salt);
+      }
+
       const numberHistoryChat = await User.updateUser(
         username,
         fullname,
-        email,
-        hashedPassword,
-        role,
+        pass,
         phong_ban,
+        role,
         createdAt,
         id
       );

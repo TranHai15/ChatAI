@@ -56,18 +56,11 @@ class User {
       await user.closeConnection(); // Đóng kết nối
     }
   }
-  static async insertUseradmin(
-    name,
-    username,
-    email,
-    password,
-    role,
-    phong_ban
-  ) {
+  static async insertUseradmin(name, username, password, role, phong_ban) {
     const user = new User();
     await user.connect();
 
-    const insert = `INSERT INTO  users (username, fullname,password, email, phong_ban, role_id, create_at, update_at)  VALUES (?, ?, ?, ?, ?, ?, ?,?)`;
+    const insert = `INSERT INTO  users (username, fullname ,password, phong_ban, role_id, create_at, update_at)  VALUES (?, ?, ?, ?, ?, ?,?)`;
 
     const create_at = dateTime();
     console.log("🚀 ~ User ~ insertUser ~ create_at:", create_at);
@@ -76,7 +69,6 @@ class User {
         name,
         username,
         password,
-        email,
         phong_ban,
         role,
         create_at,
@@ -93,14 +85,15 @@ class User {
   }
 
   // Kiểm tra xem đã tồn tại email chưa
-  static async checkEmailExists(email, data = false) {
+  static async checkEmailExists(username, data = false) {
     const user = new User();
     await user.connect();
 
-    const query = `SELECT * FROM users WHERE email = ?`;
+    const query = `SELECT * FROM users WHERE username = ?`;
 
     try {
-      const [rows] = await user.connection.execute(query, [email]);
+      const [rows] = await user.connection.execute(query, [username]);
+      console.log("🚀 ~ User ~ checkEmailExists ~ rows:", rows);
       if (!data) {
         return rows.length > 0; // Nếu có bản ghi, trả về true
       } else {
@@ -595,7 +588,6 @@ GROUP BY a.id;
     name,
     username,
     password,
-    email,
     phong_ban,
     role,
     createdAt,
@@ -604,14 +596,13 @@ GROUP BY a.id;
     const user = new User();
     await user.connect();
     const query = `UPDATE users
-                    SET username = ?, fullname =?  ,email = ?, password = ?, phong_ban = ?, role_id = ?, create_at = ? ,update_at = ?
+                    SET username = ?, fullname =?, password = ?, phong_ban = ?, role_id = ?, create_at = ? ,update_at = ?
                     WHERE id = ?;
 `;
     try {
       const [result] = await user.connection.execute(query, [
         name,
         username,
-        email,
         password,
         phong_ban,
         role,

@@ -11,6 +11,7 @@ export const AuthAppProvider = ({ children }) => {
   const [dataUser, setDataUser] = useState({});
   const [isRole, setIsRole] = useState(null);
   const [isLoad, setIsLoad] = useState(true); // Trạng thái loading
+  const [token, setToken] = useState(""); // Trạng thái loading
   const Navigate = useNavigate();
   const Location = useLocation();
   useEffect(() => {
@@ -21,9 +22,9 @@ export const AuthAppProvider = ({ children }) => {
           setIsLogin(activeUser.isLogin);
           setDataUser(activeUser.dataLogin.dataUser);
           // Decode JWT token để lấy thông tin role
-          const token = activeUser.dataLogin?.accessToken;
-          if (token) {
-            const decoded = jwtDecode(token);
+          setToken(activeUser.dataLogin?.accessToken);
+          if (activeUser.dataLogin?.accessToken) {
+            const decoded = jwtDecode(activeUser.dataLogin?.accessToken);
             const { role } = decoded;
             setIsRole(role);
           }
@@ -55,7 +56,8 @@ export const AuthAppProvider = ({ children }) => {
         dataUser,
         isRole,
         Navigate,
-        Location
+        Location,
+        token
       }}
     >
       {children}

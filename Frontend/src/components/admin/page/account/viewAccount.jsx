@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axiosClient from "../../../../api/axiosClient";
-import { useNavigate } from "react-router-dom";
 import { showNotification } from "../../../../func";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm"; // Import remark-gfm
@@ -11,25 +10,26 @@ const UserProfile = () => {
   // State để quản lý thông tin người dùng và trạng thái chỉnh sửa
   const [isEditing, setIsEditing] = useState(false);
   const [chat, setChat] = useState([]);
-
   const [chatVisible, setChatVisible] = useState(true);
+
   const [userInfo, setUserInfo] = useState({
     username: "",
     fullname: "",
-    email: "",
     password: "",
     phong_ban: "",
     role: "",
     createdAt: ""
   });
+
   const navigate = useNavigate(); // Hook để điều hướng
   const resetChat = () => {
     setChat([]);
-    setChatVisible(true); // Hide chat when reset
+    setChatVisible(true); // Hiện lại danh sách chat khi reset
   };
   const handleGoBack = () => {
     navigate(-1); // Quay lại trang trước đó
   };
+
   const [chatUser, setChatUser] = useState([]);
 
   const [editedUserInfo, setEditedUserInfo] = useState({
@@ -50,7 +50,6 @@ const UserProfile = () => {
       setUserInfo({
         username: res.data[0].username,
         fullname: res.data[0].fullname,
-        email: res.data[0].email,
         password: res.data[0].password,
         role: res.data[0].role_id,
         phong_ban: res.data[0].phong_ban,
@@ -59,8 +58,8 @@ const UserProfile = () => {
       setEditedUserInfo({
         username: res.data[0].username,
         fullname: res.data[0].fullname,
-        email: res.data[0].email,
         password: res.data[0].password,
+        oldPassword: res.data[0].password,
         role: res.data[0].role_id,
         phong_ban: res.data[0].phong_ban,
         createdAt: res.data[0].create_at
@@ -72,8 +71,7 @@ const UserProfile = () => {
   };
 
   const [errors, setErrors] = useState({
-    name: "",
-    email: "",
+    username: "",
     password: "",
     role: ""
   });
@@ -90,7 +88,7 @@ const UserProfile = () => {
         editedUserInfo.id = id;
         const res = await axiosClient.post("/api/editUser", editedUserInfo);
         console.log("🚀 ~ handleSaveClick ~ res:", res);
-        if (res.status == 200) {
+        if (res.status === 200) {
           fetchData(id);
           showNotification("Lưu thông tin thành công");
           setIsEditing(false);
@@ -108,7 +106,7 @@ const UserProfile = () => {
     setEditedUserInfo({ ...userInfo }); // Quay lại dữ liệu ban đầu
   };
 
-  // Hàm kiểm tra xác thực từng trường
+  // Hàm kiểm tra xác thực từng trường (đã loại bỏ kiểm tra email)
   const validateForm = () => {
     let formErrors = { ...errors };
     let isValid = true;
@@ -118,17 +116,6 @@ const UserProfile = () => {
       isValid = false;
     } else {
       formErrors.username = "";
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!editedUserInfo.email) {
-      formErrors.email = "Email không được để trống!";
-      isValid = false;
-    } else if (!emailRegex.test(editedUserInfo.email)) {
-      formErrors.email = "Email không hợp lệ!";
-      isValid = false;
-    } else {
-      formErrors.email = "";
     }
 
     if (!editedUserInfo.password) {
@@ -164,7 +151,7 @@ const UserProfile = () => {
   const handleViewDetailClick = async (chatId) => {
     try {
       const res = await axiosClient.post(`/user/historyChat`, { id: chatId });
-      if (res.status == 200 || res.status == 201) {
+      if (res.status === 200 || res.status === 201) {
         console.log("🚀 ~ handleViewDetailClick ~ res:", res);
         setChatVisible(false);
         setChat(res.data.getChat);
@@ -177,18 +164,18 @@ const UserProfile = () => {
   };
 
   return (
-    <div className="container mx-auto p-6  relative  ">
+    <div className="container mx-auto p-6 relative">
       {/* Thông tin người dùng */}
       <button
-        onClick={() => handleGoBack()}
+        onClick={handleGoBack}
         className="px-4 py-2 bg-blue-300 text-white rounded-md hover:bg-blue-600 mb-5"
       >
-        Quay Lai
+        Quay Lại
       </button>
       <div className="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 className="text-2xl font-semibold mb-4">Thông Tin Người Dùng</h2>
         <div className="grid grid-cols-1 gap-4">
-          {/* Các input như tên, email, mật khẩu, quyền... */}
+          {/* Các input như tên, mật khẩu, quyền, phòng ban... */}
           <div>
             <label className="block font-medium">Tên</label>
             <input
@@ -204,7 +191,7 @@ const UserProfile = () => {
             )}
           </div>
           <div>
-            <label className="block font-medium"> Full Tên</label>
+            <label className="block font-medium">Full Tên</label>
             <input
               type="text"
               name="fullname"
@@ -213,24 +200,7 @@ const UserProfile = () => {
               disabled={!isEditing}
               className="mt-1 p-2 w-full border rounded-md"
             />
-            {errors.fullname && (
-              <div className="text-red-500 text-sm mt-1">{errors.fullname}</div>
-            )}
-          </div>
-
-          <div>
-            <label className="block font-medium">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={editedUserInfo.email}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className="mt-1 p-2 w-full border rounded-md"
-            />
-            {errors.email && (
-              <div className="text-red-500 text-sm mt-1">{errors.email}</div>
-            )}
+            {/* Nếu cần kiểm tra fullname có thể bổ sung tương tự */}
           </div>
 
           <div>
@@ -314,7 +284,6 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
-      {/* Phần lịch sử chat... */}
       {/* Lịch sử chat */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-semibold mb-4">Lịch Sử Chat</h2>
@@ -328,17 +297,16 @@ const UserProfile = () => {
             </tr>
           </thead>
           <tbody>
-            {/* {chatUser[0].chat_id && */}
             {chatUser.map((chat) => (
               <tr key={chat.chat_id} className="border-b hover:bg-gray-100">
                 <td className="p-2">{chat.chat_id}</td>
                 <td className="p-2">{chat.chat_title}</td>
                 <td className="p-2">{chat.chat_create}</td>
                 <td className="p-2">
-                  {chatUser.length == 0 || chatUser[0].chat_id !== null ? (
+                  {chatUser.length === 0 || chatUser[0].chat_id !== null ? (
                     <h1 className="font-bold text-center">
                       <button
-                        onClick={() => handleViewDetailClick(chat.chat_id)} // Gọi hàm khi nhấn
+                        onClick={() => handleViewDetailClick(chat.chat_id)}
                         className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                       >
                         Xem chi tiết
@@ -350,33 +318,36 @@ const UserProfile = () => {
             ))}
           </tbody>
         </table>
-        {chatUser.length == 0 || chatUser[0].chat_id == null ? (
+        {chatUser.length === 0 || chatUser[0].chat_id == null ? (
           <h1 className="font-bold text-center">Không có lịch sử chat</h1>
         ) : null}
       </div>
       {!chatVisible && (
-        <div className=" flex justify-center mt-12 mb-2">
-          <div className=" w-full left-0 overflow-auto  bg-slate-300 p-5 your-element absolute top-0 right-0 bottom-0">
+        <div className="flex justify-center mt-12 mb-2">
+          <div className="w-full left-0 overflow-auto bg-slate-300 p-5 your-element absolute top-0 right-0 bottom-0">
             <h1 className="font-bold text-center w-full">Chat Chi tiết</h1>
             {chat.map((text, index) => (
               <div key={index}>
-                <div className=" flex gap-5 justify-end">
+                <div className="flex gap-5 justify-end">
                   {text.role === "assistant" && (
                     <div className="logo__chat logo__none min-w-10 min-h-10">
                       <div className="logo__chat--img">
-                        <img src="../../../../src/assets/user/logo.svg" />
+                        <img
+                          src="../../../../src/assets/user/logo.svg"
+                          alt="logo"
+                        />
                       </div>
                     </div>
                   )}
                   <div
-                    className={` flex role_admin-text ${
+                    className={`flex role_admin-text ${
                       text.role === "user" ? "justify-end" : "gap-4 items-start"
                     }`}
                   >
                     <div
-                      className={` flex ${
+                      className={`flex ${
                         text.role === "user"
-                          ? "content__chat--user w-full "
+                          ? "content__chat--user w-full"
                           : "content__chat"
                       }`}
                     >

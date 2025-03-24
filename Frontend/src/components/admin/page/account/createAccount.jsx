@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 import axiosClient from "../../../../api/axiosClient";
 import { useNavigate } from "react-router-dom";
 
@@ -8,7 +7,6 @@ export default function CreateAccount() {
   const [newUser, setNewUser] = useState({
     name: "",
     username: "",
-    email: "",
     password: "",
     role: "2", // Mặc định là User
     phong_ban: ""
@@ -29,16 +27,6 @@ export default function CreateAccount() {
       formErrors.username = "Full Tên không được để trống!";
       isValid = false;
     }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!newUser.email) {
-      formErrors.email = "Email không được để trống!";
-      isValid = false;
-    } else if (!emailRegex.test(newUser.email)) {
-      formErrors.email = "Email không hợp lệ!";
-      isValid = false;
-    }
-
     if (!newUser.password) {
       formErrors.password = "Mật khẩu không được để trống!";
       isValid = false;
@@ -46,7 +34,6 @@ export default function CreateAccount() {
       formErrors.password = "Mật khẩu phải có ít nhất 6 ký tự!";
       isValid = false;
     }
-
     if (!newUser.role) {
       formErrors.role = "Quyền không được để trống!";
       isValid = false;
@@ -66,14 +53,12 @@ export default function CreateAccount() {
   const handleCreateAccount = async () => {
     if (validateForm()) {
       try {
-        // console.log("🚀 ~ handleCreateAccount ~ newUser:", newUser);
         const res = await axiosClient.post("/auth/registerAdmin", newUser);
-        if (res.status == 201 || res.status == 200) {
+        if (res.status === 201 || res.status === 200) {
           alert("Tạo tài khoản thành công!");
           setNewUser({
             name: "",
             username: "",
-            email: "",
             password: "",
             role: "2",
             phong_ban: ""
@@ -127,27 +112,12 @@ export default function CreateAccount() {
             />
             {errors.username && (
               <div className="text-red-500 text-sm mt-1">{errors.username}</div>
-            )}{" "}
+            )}
             {error.username && (
               <p className="text-red-500 text-sm mt-1">
                 {errors.username.message}
               </p>
             )}
-          </div>
-
-          <div>
-            <label className="block font-medium">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={newUser.email}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-full border rounded-md"
-            />
-            {errors.email && (
-              <div className="text-red-500 text-sm mt-1">{errors.email}</div>
-            )}{" "}
-            {error && <p className="text-red-500  text-sm mt-1">{error}</p>}
           </div>
 
           <div>
@@ -161,7 +131,7 @@ export default function CreateAccount() {
             />
             {errors.password && (
               <div className="text-red-500 text-sm mt-1">{errors.password}</div>
-            )}{" "}
+            )}
             {error.password && (
               <p className="text-red-500 text-sm mt-1">
                 {errors.password.message}
@@ -183,7 +153,7 @@ export default function CreateAccount() {
             </select>
             {errors.role && (
               <div className="text-red-500 text-sm mt-1">{errors.role}</div>
-            )}{" "}
+            )}
             {error.role && (
               <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>
             )}
@@ -200,7 +170,7 @@ export default function CreateAccount() {
             />
             {error.phong_ban && (
               <p className="text-red-500 text-sm mt-1">
-                {errors.phong_ban.phong_ban}
+                {errors.phong_ban && errors.phong_ban.message}
               </p>
             )}
           </div>

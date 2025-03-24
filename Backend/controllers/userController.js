@@ -215,15 +215,15 @@ const dataUser = {
   },
   addNof: async (req, res) => {
     try {
-      const { task } = req.body;
+      const { tasks } = req.body;
 
       // Kiểm tra dữ liệu đầu vào
-      if (!task) {
+      if (!tasks) {
         return res.status(400).json({ message: "Dữ liệu là bắt buộc." });
       }
 
       // Chèn thông báo vào database
-      const getChat = await User.insertNof(task);
+      const getChat = await User.insertNof(tasks);
 
       // Phản hồi thành công
       res
