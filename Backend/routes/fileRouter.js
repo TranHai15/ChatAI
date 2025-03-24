@@ -2,16 +2,21 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
-import fileController from "../controllers/FileController.js";
-
+import fs from "fs";
+import fileController from "../controllers/fileControllers.js";
+// Đảm bảo thư mục "uploads" tồn tại
+const uploadDir = "uploads/";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 // Cấu hình lưu trữ với multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/"); // Thư mục lưu trữ file
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname); // Lấy phần mở rộng (ví dụ: .xlsx)
-    const baseName = path.basename(file.originalname, ext); // Lấy tên file gốc
+    const ext = path.extname(file.originalname);
+    const baseName = path.basename(file.originalname, ext);
 
     // Chuyển tên file thành chữ thường và loại bỏ dấu
     const newBaseName = baseName
@@ -38,11 +43,8 @@ router.post(
   upload.array("files", 10), // Cho phép upload tối đa 10 file
   fileController.uploadAndMergeFiles
 );
-router.post(
-  "/uploadPDF",
-  upload.array("files", 10), // Cho phép upload tối đa 10 file
-  fileController.uploadsPDF
-);
+
+router.post("/uploadONE", upload.array("files", 1), fileController.insertOne);
 
 router.get("/", fileController.getFile);
 
@@ -50,8 +52,10 @@ router.get("/", fileController.getFile);
 router.get("/get-file/:id", fileController.getOneFile);
 
 // Route tải xuống file gộp
-router.get("/download", fileController.downloadMergedFile);
-router.post("/save-file", fileController.saveFile);
-router.delete("/delete/:id", fileController.deleteFile);
+router.post("/download", fileController.downloadMergedFile);
+router.post("/updateCheck", fileController.updateCheck);
+router.delete("/deletes/:id", fileController.deleteFile);
+router.get("/reset/:id", fileController.resetFile);
+router.delete("/delete/:id", fileController.deleteFiles);
 
 export default router;

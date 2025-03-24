@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axiosClient from "../../../../api/axiosClient";
 import { useNavigate } from "react-router-dom";
 
@@ -10,7 +10,7 @@ const Account = () => {
   const [filters, setFilters] = useState({
     name: "",
     email: "",
-    status: "all",
+    phong_ban: "",
     startDate: "",
     endDate: ""
   });
@@ -47,12 +47,11 @@ const Account = () => {
       );
     }
 
-    if (filters.status !== "all") {
-      if (filters.status === "null") {
-        filtered = filtered.filter((user) => user.statuss == null);
-      } else {
-        filtered = filtered.filter((user) => user.statuss !== null);
-      }
+    if (filters.phong_ban.trim()) {
+      const emailSearch = filters.phong_ban.toLowerCase().replace(/\s+/g, "");
+      filtered = filtered.filter((user) =>
+        user.phong_ban?.toLowerCase().replace(/\s+/g, "").includes(emailSearch)
+      );
     }
 
     if (filters.startDate) {
@@ -76,7 +75,7 @@ const Account = () => {
     setFilters({
       name: "",
       email: "",
-      status: "all",
+      phong_ban: "",
       startDate: "",
       endDate: ""
     });
@@ -95,14 +94,22 @@ const Account = () => {
   const handleDelete = async (id) => {
     if (confirm("Bạn có chắc muốn xóa người dùng này?")) {
       try {
-        await axiosClient.delete(`/user/delete/${id}`);
-        setUsers(users.filter((user) => user.id !== id));
-        showNotification("Người dùng đã được xóa.");
+        const res = await axiosClient.delete(`/user/delete/${id}`);
+        if (res.status == 200 || res.status == 201) {
+          setUsers(users.filter((user) => user.id !== id));
+          showNotification("Người dùng đã được xóa.");
+        }
       } catch (error) {
         console.log("🚀 ~ handleDelete ~ error:", error);
-        showNotification("Không thể xóa người dùng. Vui lòng thử lại.");
+        showNotification(
+          "Không thể xóa người dùng. Vui lòng thử lại.",
+          "error"
+        );
       }
     }
+  };
+  const handleAdd = async () => {
+    Navigator(`/admin/create`);
   };
 
   return (
@@ -128,17 +135,15 @@ const Account = () => {
               }
               className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <select
-              value={filters.status}
+            <input
+              type="text"
+              placeholder="Tìm theo Phòng Ban"
+              value={filters.phong_ban}
               onChange={(e) =>
-                setFilters({ ...filters, status: e.target.value })
+                setFilters({ ...filters, phong_ban: e.target.value })
               }
               className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="o">Đang hoạt động</option>
-              <option value="null">Không hoạt động</option>
-            </select>
+            />
             <input
               type="date"
               value={filters.startDate}
@@ -165,7 +170,12 @@ const Account = () => {
             </button>
           </div>
         </div>
-
+        <button
+          onClick={handleAdd}
+          className="px-6 py-2 mb-3 bg-green-400 text-black rounded-md hover:bg-green-600"
+        >
+          Thêm tài khoản
+        </button>
         {/* Danh sách người dùng */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <table className="w-full text-left table-auto border-collapse">
@@ -175,7 +185,7 @@ const Account = () => {
                 <th className="p-3 border">Tên</th>
                 <th className="p-3 border">Email</th>
                 <th className="p-3 border">Phân quyền</th>
-                <th className="p-3 border">Trạng thái</th>
+                <th className="p-3 border">Phòng Ban</th>
                 <th className="p-3 border">Hành động</th>
               </tr>
             </thead>
@@ -183,14 +193,16 @@ const Account = () => {
               {currentItems.map((user, index) => (
                 <tr key={user.id} className="hover:bg-gray-100">
                   <td className="p-3 border">{index + 1}</td>
-                  <td className="p-3 border">{user.username}</td>
-                  <td className="p-3 border">{user.email}</td>
-                  <td className="p-3 border">
+                  <td className="p-3 border max-w-32 overflow-hidden ">
+                    {user.fullname}
+                  </td>
+                  <td className="p-3 border max-w-52 overflow-hidden">
+                    {user.email}
+                  </td>
+                  <td className="p-3 border max-w-8 overflow-hidden">
                     {user.role_id === 1 ? "Admin" : "User"}
                   </td>
-                  <td className="p-3 border">
-                    {user.statuss ? "Đang hoạt động" : "Không hoạt động"}
-                  </td>
+                  <td className="p-3 border">{user.phong_ban}</td>
                   <td className="p-3 border">
                     <button
                       onClick={() => handelEdit(user.id)}

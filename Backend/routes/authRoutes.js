@@ -9,6 +9,7 @@ import authController from "../controllers/authController.js";
 
 // Định nghĩa route đăng ký người dùng
 router.post("/register", authController.registerUser);
+router.post("/registerAdmin", authController.registerUserAdmin);
 
 // Định nghĩa route đăng nhập
 router.post("/login", authController.loginUser);

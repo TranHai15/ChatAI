@@ -4,12 +4,12 @@ import Sidebar from "./components/sidebar/";
 import "./style.css";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useContext, useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode"; // Not
 
 export default function Admin() {
   const Navigator = useNavigate();
-  const { isLogin, setIsLogin, setIsRole, setInforUser, setIsLoading } =
+  const { isLogin, setIsLogin, setIsRole, setInforUser } =
     useContext(AuthContext);
   useEffect(() => {
     const checkLoginStatus = () => {

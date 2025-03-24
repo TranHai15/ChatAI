@@ -1,0 +1,10 @@
+.notification-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.notification-page h1 {
+  text-align: center;
+  margin-bottom: 24px;
+}

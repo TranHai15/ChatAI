@@ -20,7 +20,49 @@ const authController = {
       const salt = await bcryptjs.genSalt(10);
       const hashedPassword = await bcryptjs.hash(password, salt);
 
-      const userId = await User.insertUser(username, hashedPassword, email, 0);
+      const userId = await User.insertUser(username, hashedPassword, email, 2);
+      // console.log(userId);
+      if (userId) {
+        res
+          .status(200)
+          .json({ message: "Người dùng đã được thêm thành công!", userId });
+      } else {
+        res.status(500).json("Không thể thêm người dùng.");
+      }
+    } catch (error) {
+      res.status(500).json("Đã xảy ra lỗi.");
+    }
+  },
+  registerUserAdmin: async (req, res) => {
+    const { name, username, email, password, role, phong_ban } = req.body;
+    console.log("🚀 ~ registerUser: ~ name:", name);
+    console.log("🚀 ~ registerUser: ~ phong_ban:", phong_ban);
+    console.log("🚀 ~ registerUser: ~ role:", role);
+    console.log("🚀 ~ registerUser: ~ password:", password);
+    console.log("🚀 ~ registerUser: ~ email:", email);
+    console.log("🚀 ~ registerUser: ~ username:", username);
+
+    if (!email || !password || !username) {
+      return res.status(400).json("Tên, email và mật khẩu là bắt buộc.");
+    }
+
+    try {
+      const emailExists = await User.checkEmailExists(email);
+      if (emailExists) {
+        return res.status(400).json("Email đã được sử dụng.");
+      }
+
+      const salt = await bcryptjs.genSalt(10);
+      const hashedPassword = await bcryptjs.hash(password, salt);
+
+      const userId = await User.insertUseradmin(
+        name,
+        username,
+        email,
+        hashedPassword,
+        role,
+        phong_ban
+      );
       // console.log(userId);
       if (userId) {
         res
@@ -120,7 +162,6 @@ const authController = {
     }
   },
 
-  // Refresh token
   requestRefreshToken: async (req, res) => {
     const refreshToken = req.body.refreshToken;
     if (!refreshToken) {
@@ -178,8 +219,9 @@ const authController = {
   // Logout
   userLogout: async (req, res) => {
     // console.log(req);
-    console.log(req.body);
-    // await User.deleteSession(req.body.id);
+    const { id } = req.body;
+    console.log(id);
+    await User.deleteSession(id);
     // res.clearCookie("refreshToken");
     res.status(200).json("Đăng xuất thành công.");
   }

@@ -18,6 +18,17 @@
   cursor: pointer;
   height: 40px;
 }
+/* Đối với tin chưa đọc, thêm dấu * ở đầu dòng */
+.unread::before {
+  content: "* ";
+  color: red;
+  margin-right: 4px;
+}
+
+/* Đối với tin đã đọc, làm mờ chữ */
+.read {
+  opacity: 0.6;
+}
 
 .logo__icon > img {
   width: 100%;

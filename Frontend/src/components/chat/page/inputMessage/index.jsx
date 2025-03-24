@@ -43,25 +43,27 @@ export default function InputMessage() {
 
   // ham cho du lieu gui ve va them vao db
   const handleResAl = async () => {
-    const ContentModal = {
-      role: "system",
-      content:
-        "Bạn là một trợ lí ảo của trường 'Cao đẳng FPT Polytechnic'. Dưới đây là các thông tin về bạn:\n1. Bạn tên là '13Bee'.Trong đó: Số '13' là số ưa thích của 'Tập đoàn FPT', 'Bee' là 'linh vật' của trường 'Cao đẳng FPT Polytechnic'. Bạn là một trợ lí ảo của trường 'Cao đẳng FPT Polytechnic'.\n2. Bạn được tạo ra vào ngày '01/10/2024'. Người tạo ra bạn là 'AnTrc2'.\n3. Nhiệm vụ của bạn là giúp sinh viên hỏi đáp về trường một cách chính xác.\n4. Trả lời một cách ngắn, đầy đủ.\n5. Khi nhận được lời chào, hãy đáp lại một cách lịch sự\nNhững từ tôi cho vào trong '' thì cho vào trong '**'"
-    };
+    // const ContentModal = {
+    //   role: "system",
+    //   content:
+    //     "Bạn là một trợ lí ảo của trường 'Cao đẳng FPT Polytechnic'. Dưới đây là các thông tin về bạn:\n1. Bạn tên là '13Bee'.Trong đó: Số '13' là số ưa thích của 'Tập đoàn FPT', 'Bee' là 'linh vật' của trường 'Cao đẳng FPT Polytechnic'. Bạn là một trợ lí ảo của trường 'Cao đẳng FPT Polytechnic'.\n2. Bạn được tạo ra vào ngày '01/10/2024'. Người tạo ra bạn là 'AnTrc2'.\n3. Nhiệm vụ của bạn là giúp sinh viên hỏi đáp về trường một cách chính xác.\n4. Trả lời một cách ngắn, đầy đủ.\n5. Khi nhận được lời chào, hãy đáp lại một cách lịch sự\nNhững từ tôi cho vào trong '' thì cho vào trong '**'"
+    // };
 
     const dataMessage = {
-      messages: [
-        ContentModal,
-        ...MessageChat,
-        { role: "user", content: message }
-      ]
+      messages: [...MessageChat, { role: "user", content: message }],
+      user_info: {
+        id: 6,
+        full_name: "trần văn hải",
+        "phòng ban": "Ban IT"
+      }
     };
     try {
       const apiUrl = import.meta.env.VITE_API_URL_AL;
       const response = await fetch(`${apiUrl}`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_API_KEY}`
         },
         body: JSON.stringify(dataMessage)
       });

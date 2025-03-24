@@ -14,8 +14,7 @@ export default function ChatBoxConTent() {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [MessageChat]);
-  // console.log("message", roomId);
-  const text = `helo `;
+
   return (
     <div className="ChatBoxConTent relative ">
       <main className="container__message">

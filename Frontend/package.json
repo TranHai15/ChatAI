@@ -17,6 +17,7 @@
     "dotenv": "^16.4.7",
     "json-server": "^1.0.0-beta.3",
     "jwt-decode": "^4.0.0",
+    "moment-timezone": "^0.5.48",
     "pdf-lib": "^1.17.1",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",

@@ -10,7 +10,10 @@ import PDFMerger from "pdf-merger-js";
 const merger = new PDFMerger();
 // const { PDFDocument } = require("pdf-lib"); // Thư viện để làm việc với PDF
 import { PDFDocument } from "pdf-lib";
-
+import moment from "moment-timezone";
+function dateTime() {
+  return moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss");
+}
 // Convert import.meta.url to a filesystem path
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,16 +46,16 @@ class fileModel {
     file_type,
     uploaded_by,
     version_number = 1,
-    uploaded_at = new Date().toISOString().slice(0, 19).replace("T", " "),
+    uploaded_at,
     is_active = 1
   ) {
-    // console.log("🚀 ~ fileModel ~ file_id:", file_id);
-    // console.log("🚀 ~ fileModel ~ filePath:", filePath);
-    // console.log("🚀 ~ fileModel ~ file_type:", file_type);
-    // console.log("🚀 ~ fileModel ~ uploaded_by:", uploaded_by);
-    // console.log("🚀 ~ fileModel ~ version_number:", version_number);
-    // console.log("🚀 ~ fileModel ~ uploaded_at:", uploaded_at);
-    // console.log("🚀 ~ fileModel ~  is_active :", is_active);
+    console.log("🚀 ~ fileModel ~ file_id:", file_id);
+    console.log("🚀 ~ fileModel ~ filePath:", filePath);
+    console.log("🚀 ~ fileModel ~ file_type:", file_type);
+    console.log("🚀 ~ fileModel ~ uploaded_by:", uploaded_by);
+    console.log("🚀 ~ fileModel ~ version_number:", version_number);
+    console.log("🚀 ~ fileModel ~ uploaded_at:", uploaded_at);
+    console.log("🚀 ~ fileModel ~  is_active :", is_active);
     const user = new fileModel();
     await user.connect();
 
@@ -68,7 +71,7 @@ class fileModel {
         file_type,
         version_number,
         uploaded_by,
-        uploaded_at,
+        dateTime(),
         is_active
       ]);
       return result.insertId;
@@ -109,8 +112,25 @@ class fileModel {
     const filePath = path.join(__dirname, "../uploads", file.filename);
     const fileExt = path.extname(file.filename).toLowerCase();
     const sl = Number(count) + 1;
-    const is_active = 0;
-    const uploaded_at = new Date().toISOString().slice(0, 19).replace("T", " ");
+    console.log("🚀 ~ fileModel ~ InsertOneDB ~ sl:", sl);
+
+    const is_active = 1;
+    const uploaded_at = dateTime();
+    const user = new fileModel();
+    await user.connect();
+
+    const updateQuery = `
+      UPDATE file_versions
+      SET is_active = 0
+      WHERE file_id = ?
+    `;
+    try {
+      const [result] = await user.connection.execute(updateQuery, [id]);
+    } catch (error) {
+      console.error("Lỗi khi cập nhật file vào database:", error);
+      throw error;
+    }
+
     await fileModel.insertFileDatabase(
       id,
       filePath,
@@ -156,6 +176,7 @@ class fileModel {
 
   static async insertFilesANDFiles(fileName, filePath, fileType, id) {
     const idNew = await fileModel.insertFiles(fileName, fileType);
+    console.log("🚀 ~ fileModel ~ insertFilesANDFiles ~ idNew:", idNew);
     await fileModel.insertFileDatabase(idNew, filePath, fileType, id);
   }
 
@@ -195,6 +216,7 @@ class fileModel {
   // Xử lý file và chuyển đổi sang PDF
   static async processFilesAndConvertPDF(files, id) {
     let txtFiles = [];
+
     let xlsxFiles = [];
     let pdfFiles = [];
 
@@ -209,6 +231,20 @@ class fileModel {
         pdfFiles.push(file);
       }
     });
+
+    console.log(
+      "🚀 ~ fileModel ~ processFilesAndConvertPDF ~ pdfFiles:",
+      pdfFiles
+      // id
+    );
+    console.log(
+      "🚀 ~ fileModel ~ processFilesAndConvertPDF ~ xlsxFiles:",
+      xlsxFiles
+    );
+    console.log(
+      "🚀 ~ fileModel ~ processFilesAndConvertPDF ~ txtFiles:",
+      txtFiles
+    );
 
     // Xử lý file .xlsx và .xls
     if (xlsxFiles.length > 0) {
@@ -343,11 +379,11 @@ class fileModel {
     f.created_at, 
     f.statusFile,
     COUNT(v.id) AS version_count, 
-    u.username
+    u.fullname
     FROM files f
     LEFT JOIN file_versions v ON f.id = v.file_id 
-    LEFT JOIN account u ON v.uploaded_by = u.id
-    GROUP BY f.id, f.file_name, f.fileType, f.created_at, u.username;
+    LEFT JOIN users u ON v.uploaded_by = u.id
+    GROUP BY f.id, f.file_name, f.fileType, f.created_at, u.fullname;
 ;
   `;
     try {
@@ -364,10 +400,10 @@ class fileModel {
   static async getOneFiles(id) {
     const user = new fileModel();
     await user.connect();
-    const query = `SELECT fv.* , f.file_name , u.username
+    const query = `SELECT fv.* , f.file_name , u.fullname
                     FROM file_versions fv
                     JOIN files f ON f.id=fv.file_id
-                    JOIN account u ON u.id = fv.uploaded_by
+                    JOIN users u ON u.id = fv.uploaded_by
                     WHERE file_id = ?;
   `;
     try {
@@ -380,44 +416,7 @@ class fileModel {
       await user.closeConnection(); // Đóng kết nối
     }
   }
-  // xoa file
-  static async deleteFile(id) {
-    const user = new fileModel();
-    await user.connect();
-    const param =
-      "Select file_path ,file_type, id from file_versions where file_id = ?";
-    try {
-      const [result] = await user.connection.execute(param, [id]);
-      console.log("🚀 ~ fileModel ~ deleteFile ~ result:", result);
-      result.forEach(async (element, index) => {
-        const query = `UPDATE file_versions SET is_active= 0 WHERE id=?`;
-        try {
-          const [results] = await user.connection.execute(query, [element.id]);
-          console.log("File đã được An thành công! DB", index);
-        } catch (error) {
-          console.error("Lỗi khi An người dùng:", error);
-          throw error;
-        } finally {
-          await user.closeConnection(); // Đóng kết nối
-        }
-      });
-      const params = `UPDATE files SET statusFile= 0 WHERE id= ?`;
-      try {
-        const [res] = await user.connection.execute(params, [id]);
-        // console.log("🚀 ~ fileModel ~ deleteFile ~ res:", res);
-      } catch (error) {
-        console.error("Lỗi khi xóa người dùng:", error);
-        throw error;
-      } finally {
-        await user.closeConnection(); // Đóng kết nối
-      }
 
-      await fileModel.GetFileANDSenFile();
-    } catch (error) {
-      console.error("Lỗi khi xóa người dùng:", error);
-      throw error;
-    }
-  }
   static async restFile(id) {
     const user = new fileModel();
     await user.connect();
@@ -469,10 +468,10 @@ class fileModel {
     const user = new fileModel();
     await user.connect();
     const param =
-      "Select file_path ,file_type, id from file_versions where id = ?";
+      "Select file_path ,file_type, id from file_versions where file_id = ?";
     try {
       const [result] = await user.connection.execute(param, [id]);
-      console.log("🚀 ~ fileModel ~ deleteFiles ~ result:", result);
+      // console.log("🚀 ~ fileModel ~ deleteFiles ~ result:", result);
       result.forEach(async (element, index) => {
         const query = `DELETE FROM file_versions WHERE id = ?`;
         try {
@@ -481,8 +480,6 @@ class fileModel {
         } catch (error) {
           console.error("Lỗi khi xóa người dùng:", error);
           throw error;
-        } finally {
-          await user.closeConnection(); // Đóng kết nối
         }
         // sau khi xóa trong db xong thì xóa ở ngoài  PC
         fs.unlink(element.file_path, (err) => {
@@ -493,6 +490,48 @@ class fileModel {
           }
         });
       });
+      const paramdelete = `DELETE FROM files WHERE id = ?`;
+      try {
+        const [data] = await user.connection.execute(paramdelete, [id]);
+        console.log("File đã được xóa thành công! Cha DB", data);
+      } catch (error) {
+        console.error("Lỗi khi xóa người dùng:", error);
+        throw error;
+      } finally {
+        await user.closeConnection(); // Đóng kết nối
+      }
+      await fileModel.GetFileANDSenFile();
+    } catch (error) {
+      console.error("Lỗi khi xóa người dùng:", error);
+      throw error;
+    }
+  }
+
+  static async deleteFile(id) {
+    const user = new fileModel();
+    await user.connect();
+    const param =
+      "Select file_path ,file_type, id from file_versions where id = ?";
+    try {
+      const [result] = await user.connection.execute(param, [id]);
+      console.log("🚀 ~ fileModel ~ deleteFile ~ result:", result);
+      fs.unlink(result[0].file_path, (err) => {
+        if (err) {
+          console.error("Lỗi khi xóa file:", err);
+        } else {
+          console.log("File đã được xóa thành công! PC");
+        }
+      });
+      const paramdelete = `DELETE FROM file_versions WHERE id = ?`;
+      try {
+        const [data] = await user.connection.execute(paramdelete, [id]);
+        console.log("File đã được xóa thành công! Cha DB", data);
+      } catch (error) {
+        console.error("Lỗi khi xóa người dùng:", error);
+        throw error;
+      } finally {
+        await user.closeConnection(); // Đóng kết nối
+      }
       await fileModel.GetFileANDSenFile();
     } catch (error) {
       console.error("Lỗi khi xóa người dùng:", error);

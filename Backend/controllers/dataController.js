@@ -112,14 +112,25 @@ const dataController = {
   },
   updateInfosUser: async (req, res) => {
     try {
-      const { name, email, password, role, createdAt, id } = req.body;
+      const {
+        username,
+        fullname,
+        email,
+        password,
+        role,
+        phong_ban,
+        createdAt,
+        id
+      } = req.body;
       const salt = await bcryptjs.genSalt(10);
       const hashedPassword = await bcryptjs.hash(password, salt);
       const numberHistoryChat = await User.updateUser(
-        name,
+        username,
+        fullname,
         email,
         hashedPassword,
         role,
+        phong_ban,
         createdAt,
         id
       );

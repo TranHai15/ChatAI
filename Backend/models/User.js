@@ -1,5 +1,8 @@
 import connectDatabase from "../db.js";
-
+import moment from "moment-timezone";
+function dateTime() {
+  return moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD HH:mm:ss");
+}
 class User {
   constructor() {
     this.connection = null;
@@ -23,18 +26,60 @@ class User {
   }
 
   // Tạo hàm thêm dữ liệu vào database
-  static async insertUser(name, password, email, role) {
+  static async insertUser(username, password, email, role) {
     const user = new User();
     await user.connect();
 
-    const insert = `INSERT INTO account (username, password, email, role_id , create_at) VALUES (?, ?, ?, ?, ?)`;
-    const create_at = new Date().toISOString().slice(0, 19).replace("T", " ");
+    const insert = `INSERT INTO  users (username, fullname,password, email, phong_ban, role_id, create_at, update_at)  VALUES (?, ?, ?, ?, ?, ?, ?,?)`;
+
+    const create_at = dateTime();
+    console.log("🚀 ~ User ~ insertUser ~ create_at:", create_at);
+    try {
+      const name = "demo";
+      const phong_ban = "demo";
+      const [result] = await user.connection.execute(insert, [
+        name,
+        username,
+        password,
+        email,
+        phong_ban,
+        role,
+        create_at,
+        create_at
+      ]);
+      console.log("User added:", result.insertId);
+      return result.insertId; // Trả về ID của người dùng đã thêm
+    } catch (error) {
+      console.error("Error inserting user:", error);
+      throw error;
+    } finally {
+      await user.closeConnection(); // Đóng kết nối
+    }
+  }
+  static async insertUseradmin(
+    name,
+    username,
+    email,
+    password,
+    role,
+    phong_ban
+  ) {
+    const user = new User();
+    await user.connect();
+
+    const insert = `INSERT INTO  users (username, fullname,password, email, phong_ban, role_id, create_at, update_at)  VALUES (?, ?, ?, ?, ?, ?, ?,?)`;
+
+    const create_at = dateTime();
+    console.log("🚀 ~ User ~ insertUser ~ create_at:", create_at);
     try {
       const [result] = await user.connection.execute(insert, [
         name,
+        username,
         password,
         email,
+        phong_ban,
         role,
+        create_at,
         create_at
       ]);
       console.log("User added:", result.insertId);
@@ -52,7 +97,7 @@ class User {
     const user = new User();
     await user.connect();
 
-    const query = `SELECT * FROM account WHERE email = ?`;
+    const query = `SELECT * FROM users WHERE email = ?`;
 
     try {
       const [rows] = await user.connection.execute(query, [email]);
@@ -73,8 +118,20 @@ class User {
   static async getUsers() {
     const user = new User();
     await user.connect();
-    const query = `SELECT a.*, u.access_token AS statuss FROM account a Left JOIN user_sessions u ON u.id = a.id
-;
+    const query = `SELECT 
+    u.id,
+    u.fullname,
+    u.username,
+    u.role_id,
+    u.email,
+    u.phong_ban,
+    u.create_at,
+    u.update_at,
+    r.role_name,
+    r.description
+FROM users u
+LEFT JOIN Roles r ON u.role_id = r.role_id;
+
 `;
     try {
       const [rows] = await user.connection.execute(query);
@@ -94,12 +151,12 @@ class User {
 
     const query = `SELECT 
     ch.*, 
-    a.username, 
+    a.fullname, 
     a.email
 FROM 
     chat_history AS ch
 JOIN 
-    account AS a
+    users AS a
 ON 
     ch.id = a.id
 WHERE 
@@ -118,21 +175,48 @@ ORDER BY
       await user.closeConnection(); // Đóng kết nối
     }
   }
-
-  // lấy ra 10 cau hỏi đc sử dụng nhiều nhất
-  static async getAllTopQen() {
+  static async updateNotifi(id, update_at) {
     const user = new User();
     await user.connect();
 
-    const query = `SELECT content, 
-       MIN(id) AS example_id, 
-       MIN(create_at) AS first_asked_at, 
-       COUNT(*) AS frequency
-FROM chat_history_detail
-WHERE role = 'user'
-GROUP BY content
-ORDER BY frequency DESC;
-`;
+    const query = `
+      UPDATE notifications
+      SET is_read = 1, updated_at = ?
+      WHERE id = ?`;
+    const values = [update_at, id];
+
+    try {
+      const [result] = await user.connection.execute(query, values);
+      console.log("🚀 ~ User ~ updateNotifi ~ result:", result);
+      return result.affectedRows; // Trả về số hàng đã được cập nhật
+    } catch (error) {
+      console.error("Error updating session:", error);
+      throw error;
+    } finally {
+      await user.closeConnection(); // Đóng kết nối
+    }
+  }
+
+  static async getAllNoffition() {
+    const user = new User();
+    await user.connect();
+
+    const query = `SELECT 
+    users.id AS user_id,
+    users.username,
+    users.fullname,
+    users.email,
+    users.phong_ban,
+    n.id AS task_id,
+    n.task,
+    n.deadline,
+    n.status,
+    n.is_read,
+    n.created_at
+FROM users
+LEFT JOIN notifications AS n ON users.id = n.user_id
+ ORDER BY created_at desc `;
+
     try {
       const [rows] = await user.connection.execute(query);
       return rows;
@@ -143,10 +227,47 @@ ORDER BY frequency DESC;
       await user.closeConnection(); // Đóng kết nối
     }
   }
+  static async insertNof(tasks) {
+    const user = new User();
+    await user.connect();
+
+    const query = `
+    INSERT INTO notifications (user_id, task, deadline, status, is_read, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+    try {
+      // Dùng Promise.all để chạy nhiều truy vấn song song
+      await Promise.all(
+        tasks.map(async (element) => {
+          try {
+            const values = [
+              element.id_user,
+              element.task,
+              element.deadline,
+              "pending",
+              0,
+              dateTime(),
+              dateTime()
+            ];
+            const [result] = await user.connection.execute(query, values);
+            console.log(
+              `✅ Task inserted: ${element.task} (User ID: ${element.id_user})`
+            );
+          } catch (error) {
+            console.error(`❌ Error inserting task ${element.task}:`, error);
+          }
+        })
+      );
+    } catch (error) {
+      console.error("🚨 Error inserting notifications:", error);
+      throw error;
+    } finally {
+      await user.closeConnection(); // Đóng kết nối sau khi tất cả truy vấn hoàn tất
+    }
+  }
 
   // lấy chat theo id chat
-
-  static async getAllChatByidChat_id(id) {
+  static async getAllChatByIdChat_id(id) {
     const user = new User();
     await user.connect();
 
@@ -168,13 +289,30 @@ ORDER BY frequency DESC;
     const user = new User();
     await user.connect();
 
-    const query = `DELETE FROM account WHERE id = ?`;
+    const query = `DELETE FROM users WHERE id = ?`;
 
     try {
       const [result] = await user.connection.execute(query, [id]);
       return result.affectedRows; // Trả về số bản ghi đã xóa
     } catch (error) {
       console.error("Lỗi khi xóa người dùng:", error);
+      throw error;
+    } finally {
+      await user.closeConnection(); // Đóng kết nối
+    }
+  }
+  //  lấy thông báo
+  static async getNotification(id) {
+    const user = new User();
+    await user.connect();
+
+    const query = `SELECT is_read , status,deadline,task ,id FROM notifications WHERE user_id = ? ORDER BY created_at desc `;
+
+    try {
+      const [rows] = await user.connection.execute(query, [id]);
+      return rows;
+    } catch (error) {
+      console.error("Không lấy được dữ liệu lich su chat:", error);
       throw error;
     } finally {
       await user.closeConnection(); // Đóng kết nối
@@ -341,7 +479,7 @@ ORDER BY frequency DESC;
   static async getAccount() {
     const user = new User();
     await user.connect();
-    const query = `SELECT COUNT(*) FROM account`;
+    const query = `SELECT COUNT(*) FROM users`;
     try {
       const [result] = await user.connection.execute(query);
       return result;
@@ -416,7 +554,7 @@ ORDER BY frequency DESC;
   static async getInfosUser(id) {
     const user = new User();
     await user.connect();
-    const query = `SELECT a.*, c.chat_id,c.chat_title,c.create_at AS chat_create FROM account a left JOIN chat_history c ON a.id = c.id WHERE a.id = ? ;
+    const query = `SELECT a.*, c.chat_id,c.chat_title,c.create_at AS chat_create FROM users a left JOIN chat_history c ON a.id = c.id WHERE a.id = ? ;
 `;
     try {
       const [result] = await user.connection.execute(query, [id]);
@@ -438,7 +576,7 @@ ORDER BY frequency DESC;
        MAX(ch.content) AS content
 FROM chat_history_detail ch
 JOIN chat_history c ON c.chat_id = ch.chat_id
-JOIN account a ON a.id = c.id
+JOIN users a ON a.id = c.id
 WHERE ch.content LIKE "%${content}%" AND ch.role="user"
 GROUP BY a.id;
 `;
@@ -453,25 +591,32 @@ GROUP BY a.id;
       await user.closeConnection();
     }
   }
-  static async updateUser(name, email, password, role, createdAt, id) {
+  static async updateUser(
+    name,
+    username,
+    password,
+    email,
+    phong_ban,
+    role,
+    createdAt,
+    id
+  ) {
     const user = new User();
     await user.connect();
-    const query = `UPDATE account
-                    SET username = ?, email = ?, password = ?, role_id = ?, create_at = ?
+    const query = `UPDATE users
+                    SET username = ?, fullname =?  ,email = ?, password = ?, phong_ban = ?, role_id = ?, create_at = ? ,update_at = ?
                     WHERE id = ?;
- ;
 `;
     try {
-      const createdAts = new Date()
-        .toISOString()
-        .slice(0, 19)
-        .replace("T", " ");
       const [result] = await user.connection.execute(query, [
         name,
+        username,
         email,
         password,
+        phong_ban,
         role,
-        createdAts,
+        dateTime(),
+        dateTime(),
         id
       ]);
       // console.log("🚀 ~ User ~ getHistoryChat ~ result:", result);

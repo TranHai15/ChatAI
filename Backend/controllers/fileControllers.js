@@ -33,13 +33,18 @@ const fileController = {
     }
     try {
       const idUser = req.headers["ms"];
+      const { countFile, id } = req.body;
+      const file = req.files[0];
       const mergedFilePath = await fileModel.InsertOneDB(
-        req.files[0],
-        req.body.id,
+        file,
+        id,
         idUser,
-        req.body.countFile
+        countFile
       );
-      console.log(mergedFilePath);
+      // console.log("🚀 ~ insertOne: ~ files:", file);
+      // console.log("🚀 ~ insertOne: ~ id:", id);
+      // console.log("🚀 ~ insertOne: ~ countFile:", countFile);
+      // console.log(mergedFilePath);
       res.send({
         message: "Files uploaded and merged successfully",
         mergedFile: mergedFilePath
@@ -167,7 +172,6 @@ const fileController = {
 
       const deleteCount = await fileModel.deleteFiles(idUser); // Gọi hàm delete
 
-      // if (deleteCount > 0) {
       return res
         .status(200)
         .json({ message: "Xóa thành công", deletedCount: deleteCount });

@@ -1,20 +1,27 @@
 import { showNotification } from "../../../../func";
 import "./style.css";
 import { NavLink } from "react-router-dom";
-
+import axiosClient from "../../../../api/axiosClient";
 export default function Sidebar() {
+  const datass = JSON.parse(localStorage.getItem("active"));
+  const id = datass?.dataLogin?.dataUser?.id;
   const logout = async () => {
-    const data = {
-      data: {
-        dataUser: "",
-        refreshToken: "",
-        accessToken: ""
-      },
-      isLogin: false
-    };
-    localStorage.setItem("active", JSON.stringify(data));
-    showNotification("Đăng Xuat thành công!", "success");
-    window.location.reload();
+    const res = await axiosClient.post("/auth/logout", { id: id });
+    if (res.status === 200 || res.status == 201) {
+      const data = {
+        data: {
+          dataUser: "",
+          refreshToken: "",
+          accessToken: ""
+        },
+        isLogin: false
+      };
+      localStorage.setItem("active", JSON.stringify(data));
+      showNotification("Đăng Xuat thành công!", "success");
+      window.location.reload();
+    } else {
+      showNotification("Đăng  Xuat Không thành công!", "error");
+    }
   };
   return (
     <aside className="admin-sidebar">
@@ -43,15 +50,16 @@ export default function Sidebar() {
         </li>
         <li>
           <NavLink
-            to="/admin/topQuestion"
+            to="/admin/nof"
             end
             className={({ isActive }) =>
               isActive ? "active-link" : "inactive-link"
             }
           >
-            Top Câu Hỏi
+            Danh Sách Công việc
           </NavLink>
         </li>
+
         <li>
           <NavLink
             to="/admin/file"

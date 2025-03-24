@@ -2,22 +2,23 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axiosClient from "../../../../api/axiosClient";
 import { useNavigate } from "react-router-dom";
-import { showNotification, showConfirm } from "../../../../func";
+import { showNotification } from "../../../../func";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm"; // Import remark-gfm
-import Swal from "sweetalert2";
 
 const UserProfile = () => {
+  const Navigator = useNavigate();
   // State để quản lý thông tin người dùng và trạng thái chỉnh sửa
   const [isEditing, setIsEditing] = useState(false);
   const [chat, setChat] = useState([]);
 
   const [chatVisible, setChatVisible] = useState(true);
-  console.log("🚀 ~ chatVisible:", chatVisible);
   const [userInfo, setUserInfo] = useState({
-    name: "",
+    username: "",
+    fullname: "",
     email: "",
     password: "",
+    phong_ban: "",
     role: "",
     createdAt: ""
   });
@@ -45,18 +46,23 @@ const UserProfile = () => {
   const fetchData = async (id) => {
     try {
       const res = await axiosClient.get(`/api/userView/${id}`);
+      console.log("🚀 ~ fetchData ~ res:", res);
       setUserInfo({
-        name: res.data[0].username,
+        username: res.data[0].username,
+        fullname: res.data[0].fullname,
         email: res.data[0].email,
         password: res.data[0].password,
         role: res.data[0].role_id,
+        phong_ban: res.data[0].phong_ban,
         createdAt: res.data[0].create_at
       });
       setEditedUserInfo({
-        name: res.data[0].username,
+        username: res.data[0].username,
+        fullname: res.data[0].fullname,
         email: res.data[0].email,
         password: res.data[0].password,
         role: res.data[0].role_id,
+        phong_ban: res.data[0].phong_ban,
         createdAt: res.data[0].create_at
       });
       setChatUser(res.data);
@@ -83,9 +89,11 @@ const UserProfile = () => {
       try {
         editedUserInfo.id = id;
         const res = await axiosClient.post("/api/editUser", editedUserInfo);
+        console.log("🚀 ~ handleSaveClick ~ res:", res);
         if (res.status == 200) {
           fetchData(id);
           showNotification("Lưu thông tin thành công");
+          setIsEditing(false);
         } else {
           showNotification("Lỗi khi lưu thông tin!");
         }
@@ -105,11 +113,11 @@ const UserProfile = () => {
     let formErrors = { ...errors };
     let isValid = true;
 
-    if (!editedUserInfo.name) {
-      formErrors.name = "Tên không được để trống!";
+    if (!editedUserInfo.username) {
+      formErrors.username = "Tên không được để trống!";
       isValid = false;
     } else {
-      formErrors.name = "";
+      formErrors.username = "";
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -156,7 +164,8 @@ const UserProfile = () => {
   const handleViewDetailClick = async (chatId) => {
     try {
       const res = await axiosClient.post(`/user/historyChat`, { id: chatId });
-      if (res.status === 200) {
+      if (res.status == 200 || res.status == 201) {
+        console.log("🚀 ~ handleViewDetailClick ~ res:", res);
         setChatVisible(false);
         setChat(res.data.getChat);
       } else {
@@ -184,14 +193,28 @@ const UserProfile = () => {
             <label className="block font-medium">Tên</label>
             <input
               type="text"
-              name="name"
-              value={editedUserInfo.name}
+              name="username"
+              value={editedUserInfo.username}
               onChange={handleInputChange}
               disabled={!isEditing}
               className="mt-1 p-2 w-full border rounded-md"
             />
-            {errors.name && (
-              <div className="text-red-500 text-sm mt-1">{errors.name}</div>
+            {errors.username && (
+              <div className="text-red-500 text-sm mt-1">{errors.username}</div>
+            )}
+          </div>
+          <div>
+            <label className="block font-medium"> Full Tên</label>
+            <input
+              type="text"
+              name="fullname"
+              value={editedUserInfo.fullname}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+              className="mt-1 p-2 w-full border rounded-md"
+            />
+            {errors.fullname && (
+              <div className="text-red-500 text-sm mt-1">{errors.fullname}</div>
             )}
           </div>
 
@@ -235,14 +258,25 @@ const UserProfile = () => {
               className="mt-1 p-2 w-full border rounded-md"
             >
               <option value="1">Admin</option>
-              <option value="0">User</option>
-              <option value="2">Khóa tài Khoản</option>
+              <option value="2">User</option>
+              <option value="3">Khóa tài Khoản</option>
             </select>
             {errors.role && (
               <div className="text-red-500 text-sm mt-1">{errors.role}</div>
             )}
           </div>
 
+          <div>
+            <label className="block font-medium">Phòng Ban</label>
+            <input
+              type="text"
+              name="phong_ban"
+              value={editedUserInfo.phong_ban}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+              className="mt-1 p-2 w-full border rounded-md"
+            />
+          </div>
           <div>
             <label className="block font-medium">Ngày tạo</label>
             <input

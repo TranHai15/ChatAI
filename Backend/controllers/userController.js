@@ -1,10 +1,15 @@
 import User from "../models/User.js";
 import axios from "axios";
+import { setupSocket, getSocketIO } from "../socket.js"; // Import file Socket.io
 
 // Quản lý người dùng
 const dataUser = {
   getAllUsers: async (req, res) => {
     try {
+      const { user_id, deadline, task } = req.body;
+      // console.log("🚀 ~ getAllUsers: ~ user_id:", user_id);
+      // console.log("🚀 ~ getAllUsers: ~ task:", task);
+      // console.log("🚀 ~ getAllUsers: ~ deadline:", deadline);
       const dataAllUser = await User.getUsers();
 
       if (!dataAllUser) {
@@ -15,15 +20,30 @@ const dataUser = {
       return res.status(500).json("Lỗi truy vấn dataUser");
     }
   },
+  getAllNotification: async (req, res) => {
+    try {
+      const idUser = req.body.id;
+      if (!idUser) {
+        return res.status(400).json("ID người dùng là bắt buộc."); // Kiểm tra ID
+      }
+
+      const Notification = await User.getNotification(idUser);
+      return res.status(200).json({ Notification });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "Lỗi lay lich su chat", error: error.message });
+    }
+  },
 
   // Xóa người dùng
   deleteUser: async (req, res) => {
     try {
       const idUser = req.params.id; // Lấy id từ req.params thay vì req.body
+      console.log("🚀 ~ deleteUser: ~ idUser:", idUser);
       if (!idUser) {
         return res.status(400).json("ID người dùng là bắt buộc."); // Kiểm tra ID
       }
-
       const deleteCount = await User.delete(idUser); // Gọi hàm delete
 
       if (deleteCount > 0) {
@@ -56,15 +76,32 @@ const dataUser = {
         .json({ message: "Lỗi lay lich su chat", error: error.message });
     }
   },
-  getAllTopCauHoi: async (req, res) => {
+  getAllNof: async (req, res) => {
     try {
-      const getChatTop = await User.getAllTopQen();
+      const getChat = await User.getAllNoffition();
       // console.log("message: Lay thành công");
-      return res.status(200).json({ getChatTop });
+      return res.status(200).json({ getChat });
     } catch (error) {
-      return res
-        .status(500)
-        .json({ message: "Lỗi lay top su chat", error: error.message });
+      return res.status(500).json({
+        message: "Lỗi lay lich su chat chi tiet",
+        error: error.message
+      });
+    }
+  },
+  updateNofi: async (id, update_at) => {
+    try {
+      const idUser = id;
+      console.log(idUser);
+      if (!idUser) {
+        return res.status(400).json("ID người dùng là bắt buộc."); // Kiểm tra ID
+      }
+
+      await User.updateNotifi(idUser, update_at);
+    } catch (error) {
+      console.log(error);
+      // return res
+      //   .status(500)
+      //   .json({ message: "Lỗi lay lich su chat", error: error.message });
     }
   },
   getAllChatAdmin: async (req, res) => {
@@ -76,7 +113,7 @@ const dataUser = {
         return res.status(400).json("ID chat là bắt buộc."); // Kiểm tra ID
       }
 
-      const getChat = await User.getAllChatByidChat_id(idUser);
+      const getChat = await User.getAllChatByIdChat_id(idUser);
       // console.log("message: Lay thành công");
       return res.status(200).json({ getChat });
     } catch (error) {
@@ -166,7 +203,7 @@ const dataUser = {
         return res.status(400).json("ID chat là bắt buộc."); // Kiểm tra ID
       }
 
-      const getChat = await User.getAllChatByidChat_id(idUser);
+      const getChat = await User.getAllChatByIdChat_id(idUser);
       // console.log("message: Lay thành công");
       return res.status(200).json({ getChat });
     } catch (error) {
@@ -174,6 +211,35 @@ const dataUser = {
         message: "Lỗi lay lich su chat chi tiet",
         error: error.message
       });
+    }
+  },
+  addNof: async (req, res) => {
+    try {
+      const { task } = req.body;
+
+      // Kiểm tra dữ liệu đầu vào
+      if (!task) {
+        return res.status(400).json({ message: "Dữ liệu là bắt buộc." });
+      }
+
+      // Chèn thông báo vào database
+      const getChat = await User.insertNof(task);
+
+      // Phản hồi thành công
+      res
+        .status(200)
+        .json({ success: true, message: "Thêm thông báo thành công." });
+
+      // Gửi sự kiện qua Socket.IO cho tất cả người dùng đang kết nối
+      const io = getSocketIO();
+      io.emit("notificationUpdated", {
+        status: true,
+        message: "Cập nhật thông báo mới"
+      });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ message: "Lỗi khi thêm thông báo", error: error.message });
     }
   }
 };
