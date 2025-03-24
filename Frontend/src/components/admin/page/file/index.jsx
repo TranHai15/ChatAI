@@ -283,6 +283,7 @@ const FileList = () => {
                   onChange={handleFileChange}
                   multiple
                   className="absolute inset-0 opacity-0 cursor-pointer w-min"
+                  accept=".pdf, .xls, .xlsx"
                 />
                 <button
                   className=" text-black flex gap-4 bg-green-300 py-3 px-6 rounded-md  hover:bg-green-600"

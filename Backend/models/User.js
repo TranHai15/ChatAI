@@ -204,7 +204,7 @@ ORDER BY
     n.is_read,
     n.created_at
 FROM users
-LEFT JOIN notifications AS n ON users.id = n.user_id
+JOIN notifications AS n ON users.id = n.user_id
  ORDER BY created_at desc `;
 
     try {

@@ -98,23 +98,20 @@ const Nof = () => {
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
           <h2 className="text-xl font-semibold mb-4">Bộ Lọc</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <input
+
+            <div>
+              <label htmlFor="" className="pl-4">Tìm theo tên</label>
+              <input
               type="text"
               placeholder="Tìm theo tên"
               value={filters.name}
               onChange={(e) => setFilters({ ...filters, name: e.target.value })}
               className="p-3 border rounded-md"
             />
-            <input
-              type="text"
-              placeholder="Tìm theo email"
-              value={filters.email}
-              onChange={(e) =>
-                setFilters({ ...filters, email: e.target.value })
-              }
-              className="p-3 border rounded-md"
-            />
-            <input
+            </div>
+            <div>
+              <label htmlFor="" className="pl-4">Tìm theo phòng ban</label>
+              <input
               type="text"
               placeholder="Tìm theo Phòng Ban"
               value={filters.phong_ban}
@@ -123,7 +120,10 @@ const Nof = () => {
               }
               className="p-3 border rounded-md"
             />
-            <input
+            </div>
+            <div>
+              <label htmlFor="" className="pl-4">Ngày bắt đầu</label>
+              <input
               type="date"
               value={filters.startDate}
               onChange={(e) =>
@@ -131,7 +131,10 @@ const Nof = () => {
               }
               className="p-3 border rounded-md"
             />
-            <input
+            </div>
+            <div>
+              <label htmlFor="" className="pl-4">Ngày kết thúc</label>
+              <input
               type="date"
               value={filters.endDate}
               onChange={(e) =>
@@ -139,6 +142,7 @@ const Nof = () => {
               }
               className="p-3 border rounded-md"
             />
+            </div>
           </div>
           <button
             onClick={handleReset}
@@ -159,7 +163,6 @@ const Nof = () => {
                   <th className="border px-4 py-2">Phòng ban</th>
                   <th className="border px-4 py-2">Trạng thái</th>
                   <th className="border px-4 py-2">Hạn chót</th>
-                  <th className="border px-4 py-2">Email</th>
                   <th className="border px-4 py-2">Đã đọc</th>
                   <th className="border px-4 py-2">Ngày tạo</th>
                 </tr>
@@ -176,9 +179,6 @@ const Nof = () => {
                       <td className="border px-4 py-2">{notif.phong_ban}</td>
                       <td className="border px-4 py-2">{notif.status}</td>
                       <td className="border px-4 py-2">{notif.deadline}</td>
-                      <td className="border px-4 py-2 max-w-20 overflow-hidden">
-                        {notif.email}
-                      </td>
                       <td className="border px-4 py-2">
                         {notif.is_read ? "✅" : "❌"}
                       </td>

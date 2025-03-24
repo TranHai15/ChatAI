@@ -5,7 +5,7 @@ function showNotification(message, type = "success") {
   Swal.fire({
     icon: type, // type có thể là 'success', 'error', 'warning', 'info'
     title: message,
-    showConfirmButton: false,
+    showConfirmButton: true,
     timer: 3000 // Thông báo tự động biến mất sau 3 giây
   });
 }
