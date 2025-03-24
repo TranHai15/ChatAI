@@ -16,10 +16,20 @@ const fileController = {
         req.files,
         id
       );
-      res.send({
-        message: "Files uploaded and merged successfully",
-        mergedFile: mergedFilePath
-      });
+      console.log(
+        "🚀 ~ uploadAndMergeFiles: ~ mergedFilePath:",
+        mergedFilePath
+      );
+      if (mergedFilePath.status == true) {
+        return res
+          .status(200)
+          .json({ message: "Thêm và gửi file thành công", type: "success" });
+      } else {
+        return res.status(200).json({
+          message: "Thêm và gửi file Thất bại",
+          type: "error"
+        });
+      }
     } catch (error) {
       console.error(error);
       res
@@ -45,10 +55,16 @@ const fileController = {
       // console.log("🚀 ~ insertOne: ~ id:", id);
       // console.log("🚀 ~ insertOne: ~ countFile:", countFile);
       // console.log(mergedFilePath);
-      res.send({
-        message: "Files uploaded and merged successfully",
-        mergedFile: mergedFilePath
-      });
+      if (mergedFilePath.status == true) {
+        return res
+          .status(200)
+          .json({ message: "Thêm và gửi file thành công", type: "success" });
+      } else {
+        return res.status(200).json({
+          message: "Thêm và gửi file Thất bại",
+          type: "error"
+        });
+      }
       //   // await fileModel.updeteSenFile();
     } catch (error) {
       console.error(error);
@@ -127,12 +143,16 @@ const fileController = {
       const deleteCount = await fileModel.deleteFile(idUser); // Gọi hàm delete
 
       // if (deleteCount > 0) {
-      return res
-        .status(200)
-        .json({ message: "Ẩn thành công", deletedCount: deleteCount });
-      // } else {
-      //   return res.status(404).json("Không tìm thấy người dùng để xóa.");
-      // }
+      if (deleteCount.status == true) {
+        return res
+          .status(200)
+          .json({ message: "Thêm và gửi file thành công", type: "success" });
+      } else {
+        return res.status(200).json({
+          message: "Thêm và gửi file Thất bại",
+          type: "error"
+        });
+      }
     } catch (error) {
       return res
         .status(500)
@@ -172,12 +192,16 @@ const fileController = {
 
       const deleteCount = await fileModel.deleteFiles(idUser); // Gọi hàm delete
 
-      return res
-        .status(200)
-        .json({ message: "Xóa thành công", deletedCount: deleteCount });
-      // } else {
-      //   return res.status(404).json("Không tìm thấy người dùng để xóa.");
-      // }
+      if (deleteCount.status == true) {
+        return res
+          .status(200)
+          .json({ message: "Thêm và gửi file thành công", type: "success" });
+      } else {
+        return res.status(200).json({
+          message: "Thêm và gửi file Thất bại",
+          type: "error"
+        });
+      }
     } catch (error) {
       return res
         .status(500)
@@ -193,10 +217,16 @@ const fileController = {
 
       const mergedFilePath = await fileModel.updateFileOne(idFile, id);
 
-      res.send({
-        message: "Files uploaded and merged successfully",
-        mergedFile: mergedFilePath
-      });
+      if (mergedFilePath.status == true) {
+        return res
+          .status(200)
+          .json({ message: "Thêm và gửi file thành công", type: "success" });
+      } else {
+        return res.status(200).json({
+          message: "Thêm và gửi file Thất bại",
+          type: "error"
+        });
+      }
       // await fileModel.updeteSenFile();
     } catch (error) {
       console.error(error);

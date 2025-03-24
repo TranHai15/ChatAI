@@ -9,8 +9,7 @@ import { jwtDecode } from "jwt-decode"; // Not
 
 export default function Admin() {
   const Navigator = useNavigate();
-  const { isLogin, setIsLogin, setIsRole, setInforUser } =
-    useContext(AuthContext);
+  const { isLogin } = useContext(AuthContext);
   useEffect(() => {
     const checkLoginStatus = () => {
       try {
@@ -18,8 +17,8 @@ export default function Admin() {
         // console.log("🚀 ~ checkLoginStatus ~ activeUser:", activeUser);
 
         if (activeUser && activeUser.isLogin) {
-          setInforUser(activeUser);
-          setIsLogin(true);
+          // setInforUser(activeUser);
+          // setIsLogin(true);
 
           // Decode JWT token để lấy thông tin role
           const token = activeUser.dataLogin?.accessToken;
@@ -28,7 +27,7 @@ export default function Admin() {
             // console.log("🚀 ~ checkLoginStatus ~ decoded:", decoded);
             const { role_id } = decoded;
             // console.log("🚀 ~ checkLoginStatus ~ role:", role_id);
-            setIsRole(role_id);
+            // setIsRole(role_id);
             if (role_id === 1) {
               return;
             } else {
@@ -36,14 +35,14 @@ export default function Admin() {
             }
           }
         } else {
-          setIsLogin(false);
-          setInforUser({});
-          setIsRole(-1);
+          // setIsLogin(false);
+          // setInforUser({});
+          // setIsRole(-1);
           Navigator("/");
         }
       } catch (error) {
         console.error("Error decoding token:", error);
-        setIsLogin(false); // Đảm bảo trạng thái chính xác khi gặp lỗi
+        // setIsLogin(false); // Đảm bảo trạng thái chính xác khi gặp lỗi
       } finally {
         // console.log("message");
       }

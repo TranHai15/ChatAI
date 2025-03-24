@@ -4,11 +4,13 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import fileController from "../controllers/fileControllers.js";
+
 // Đảm bảo thư mục "uploads" tồn tại
 const uploadDir = "uploads/";
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
+
 // Cấu hình lưu trữ với multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -29,11 +31,23 @@ const storage = multer.diskStorage({
     const timestamp = Date.now();
     const newFileName = `${newBaseName}-${timestamp}${ext}`; // Đặt tên file mới
 
-    cb(null, newFileName); // Đặt tên file mới
+    cb(null, newFileName);
   }
 });
 
-const upload = multer({ storage: storage });
+// Hàm fileFilter để chỉ cho phép file .xlsx, .pdf, .txt
+const fileFilter = (req, file, cb) => {
+  const allowedExtensions = [".xlsx", ".pdf", ".txt"];
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (allowedExtensions.includes(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Chỉ cho phép file xlsx, pdf và txt!"), false);
+  }
+};
+
+// Khởi tạo multer với storage và fileFilter
+const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 const router = express.Router();
 

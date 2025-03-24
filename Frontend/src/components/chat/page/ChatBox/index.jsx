@@ -14,7 +14,6 @@ export default function ChatBoxConTent() {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [MessageChat]);
-
   return (
     <div className="ChatBoxConTent relative ">
       <main className="container__message">
@@ -48,8 +47,7 @@ export default function ChatBoxConTent() {
             </div>
           </div>
         ))}
-        {/* {<Markdown remarkPlugins={[remarkGfm]}>{text ?? null}</Markdown>} */}
-        {/* loadaing */}
+
         {isLoading && (
           <div className="flex gap-4 items-start">
             <div className="logo__chat logo__none w-10 h-w-10">
@@ -66,8 +64,6 @@ export default function ChatBoxConTent() {
         )}
         <div ref={chatEndRef} />
       </main>
-      {/* <Markdown>{markdown}</Markdown> */}
-      {/* {!roomId && <div className="hello-world">Hello World</div>} */}
       <div className={roomId ? `inputMessage` : "inputMessages "}>
         <div className={roomId ? "" : "inputtet "}>
           <InputMessage />

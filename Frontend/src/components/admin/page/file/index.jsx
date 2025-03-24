@@ -71,9 +71,11 @@ const FileList = () => {
   const handleDeleteFile = async (fileId) => {
     if (confirm("Ban có muốn xóa file không ??????????")) {
       try {
+        setIsSaving(true);
         await axiosClient.delete(`/file/delete/${fileId}`); // API xóa file
         setFiles(files.filter((file) => file.id !== fileId)); // Xóa file khỏi state
         fetchFiles();
+        setIsSaving(false);
         showNotification("Xóa file thành công");
       } catch (error) {
         console.error("Error deleting file", error);
@@ -121,8 +123,7 @@ const FileList = () => {
       // Kiểm tra phản hồi từ server
       if (response.status == 200 || response.status == 201) {
         setIsSaving(false);
-        // alert(response.data.message || "Files uploaded successfully");
-        showNotification("Thêm file thành công");
+        showNotification(response.data.message, response.data.type);
         setFilesAdd([]);
         fetchFiles(); // Gọi hàm cập nhật danh sách file
       } else {
@@ -147,6 +148,7 @@ const FileList = () => {
 
   const handleDownload = async (filePath, fileType) => {
     try {
+      setIsSaving(true);
       // Gọi API để tải file
       const response = await axiosClient.post(
         "/file/download",
@@ -168,6 +170,7 @@ const FileList = () => {
 
       // Xóa URL tạm thời sau khi tải xong
       window.URL.revokeObjectURL(url);
+      setIsSaving(false);
       showNotification("Download file thành công");
     } catch (error) {
       console.error("Error downloading file:", error);
@@ -178,6 +181,7 @@ const FileList = () => {
       const one = fileType[0];
       const trues = fileType[1];
       if (one == trues) {
+        setIsSaving(true);
         setUploadStatus("uploading"); // Đang tải lên
         const formData = new FormData();
         formData.append("files", file);
@@ -192,7 +196,7 @@ const FileList = () => {
 
           // Kiểm tra phản hồi từ server
           if (response.status == 200 || response.status == 201) {
-            // setIsSaving(false);
+            setIsSaving(false);
             // alert(response.data.message || "Files uploaded successfully");
             fetchFileDetails(fileDetailsID);
             showNotification("Đã Upload file thành công");
@@ -221,9 +225,11 @@ const FileList = () => {
     }
     if (confirm("Ban có muốn xóa không??????????")) {
       try {
+        setIsSaving(true);
         await axiosClient.delete(`/file/deletes/${id}`); // API xóa file
         setFileDetails(files.filter((file) => file.id !== id)); // Xóa file khỏi state
         fetchFileDetails(fileDetailsID);
+        setIsSaving(false);
         showNotification("Xóa file thành công");
       } catch (error) {
         console.error("Error deleting file", error);
@@ -238,12 +244,14 @@ const FileList = () => {
     } else {
       if (confirm("Ban có muốn thay đổi ????")) {
         try {
+          setIsSaving(true);
           await axiosClient.post(`/file/updateCheck`, {
             id: id,
             fileDetailsID: fileDetailsID
           }); // API xóa file
           // Xóa file khỏi state
           fetchFileDetails(fileDetailsID);
+          setIsSaving(false);
           showNotification("Chọn file thành công");
         } catch (error) {
           console.error("Error deleting file", error);

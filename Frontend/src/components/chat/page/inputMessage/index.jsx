@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import { useRef, useEffect, useContext } from "react";
 import { flushSync } from "react-dom";
 import "./style.css";
 import { ChatContext } from "../../../../contexts/ChatContext";
-import { useLocation, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../../../contexts/AuthContext";
 import axiosClient from "../../../../api/axiosClient";
 export default function InputMessage() {
   const {
@@ -13,48 +13,44 @@ export default function InputMessage() {
     SetMessagesChat,
     setIsSending,
     setRoomId,
-    setIsLoading,
-    isLoading
+    setIsLoading
   } = useContext(ChatContext);
+  const { isLogin, dataUser, isRole, Navigate, Location } =
+    useContext(AuthContext);
 
-  const navigate = useNavigate();
-  const roomIdLoca = useRef(null);
-  const location = useLocation();
-  const existingRoomId = location.pathname;
-  const tachchuoi = existingRoomId.split("/");
-  const dauchuoi = tachchuoi[1];
-  const cuoichuoi = tachchuoi[2];
+  const roomId = useRef(null);
+  const existingRoomId = Location.pathname;
+  const url = existingRoomId.split("/");
+  const urlId = url[2];
 
   useEffect(() => {
-    roomIdLoca.current = cuoichuoi;
-    setRoomId(roomIdLoca.current);
-  }, [location.pathname]);
+    if (isLogin && isRole !== null) {
+      roomId.current = urlId;
+      setRoomId(roomId.current);
+    }
+  }, [Location.pathname]);
 
   function checkUrlRoom() {
     if (existingRoomId === "/" || existingRoomId.length <= 2) {
-      const Idmaphongngaunhien = generateRoomId();
-      roomIdLoca.current = Idmaphongngaunhien;
-      navigate(`/c/${Idmaphongngaunhien}`);
-      localStorage.setItem("room", Idmaphongngaunhien);
+      const idPhong = generateRoomId();
+      roomId.current = idPhong;
+      Navigate(`/c/${idPhong}`);
+      localStorage.setItem("room", idPhong);
     } else {
-      roomIdLoca.current = cuoichuoi;
+      roomId.current = urlId;
     }
   }
 
   // ham cho du lieu gui ve va them vao db
   const handleResAl = async () => {
-    // const ContentModal = {
-    //   role: "system",
-    //   content:
-    //     "Bạn là một trợ lí ảo của trường 'Cao đẳng FPT Polytechnic'. Dưới đây là các thông tin về bạn:\n1. Bạn tên là '13Bee'.Trong đó: Số '13' là số ưa thích của 'Tập đoàn FPT', 'Bee' là 'linh vật' của trường 'Cao đẳng FPT Polytechnic'. Bạn là một trợ lí ảo của trường 'Cao đẳng FPT Polytechnic'.\n2. Bạn được tạo ra vào ngày '01/10/2024'. Người tạo ra bạn là 'AnTrc2'.\n3. Nhiệm vụ của bạn là giúp sinh viên hỏi đáp về trường một cách chính xác.\n4. Trả lời một cách ngắn, đầy đủ.\n5. Khi nhận được lời chào, hãy đáp lại một cách lịch sự\nNhững từ tôi cho vào trong '' thì cho vào trong '**'"
-    // };
-
+    const { id, fullname, phong_ban, username } = dataUser;
     const dataMessage = {
       messages: [...MessageChat, { role: "user", content: message }],
       user_info: {
-        id: 6,
-        full_name: "trần văn hải",
-        "phòng ban": "Ban IT"
+        id: id,
+        fullname: fullname,
+        phong_ban: phong_ban,
+        username: username
       }
     };
     try {
@@ -71,12 +67,6 @@ export default function InputMessage() {
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
       }
-      // const daya = await response.json();
-
-      // // console.log("data", daya.message);
-      // SetMessagesChat((e) => {
-      //   return [...e, { role: "assistant", content: daya.message }];
-      // });
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
@@ -113,11 +103,11 @@ export default function InputMessage() {
           });
         });
       }
-      await InsertMessageUser(roomIdLoca.current, {
+      await InsertMessageUser(roomId.current, {
         role: "user",
         content: message
       });
-      await InsertMessageUser(roomIdLoca.current, {
+      await InsertMessageUser(roomId.current, {
         role: "assistant",
         content: accumulatedResponse
       });
@@ -176,10 +166,8 @@ export default function InputMessage() {
       handleSummit();
     }
   };
-
   const InsertMessageUser = async (room, message) => {
-    const activeUser = JSON.parse(localStorage.getItem("active"));
-    const id = activeUser.dataLogin.dataUser.id;
+    const id = dataUser.id;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         const res = await axiosClient.post("http://localhost:3000/user/send", {

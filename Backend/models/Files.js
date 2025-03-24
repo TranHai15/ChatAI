@@ -140,7 +140,14 @@ class fileModel {
       uploaded_at,
       is_active
     );
-    await fileModel.GetFileANDSenFile();
+    const res = await fileModel.GetFileANDSenFile();
+    if (res.status == true) {
+      console.log("Quá trình xử lý hoàn tất!");
+      return { status: true };
+    } else {
+      console.log("Quá trình xử lý That bai!");
+      return { status: false };
+    }
   }
 
   static async updateFileDatabase(fileName, filePath, fileType, id) {
@@ -204,10 +211,18 @@ class fileModel {
 
       console.log(`Đã kích hoạt phiên bản có id ${activeId}`);
       await user.connection.commit();
-      await fileModel.GetFileANDSenFile();
+      const res = await fileModel.GetFileANDSenFile();
+      if (res.status == true) {
+        console.log("Quá trình xử lý hoàn tất!");
+        return { status: true };
+      } else {
+        console.log("Quá trình xử lý That bai!");
+        return { status: false };
+      }
     } catch (error) {
       await user.connection.rollback();
       console.error("Lỗi cập nhật:", error.message);
+      return { status: false };
     } finally {
       await user.connection.end();
     }
@@ -294,7 +309,14 @@ class fileModel {
     } else {
       console.log("No .pdf files to process");
     }
-    await fileModel.GetFileANDSenFile();
+    const res = await fileModel.GetFileANDSenFile();
+    if (res.status == true) {
+      console.log("Quá trình xử lý hoàn tất!");
+      return { status: true };
+    } else {
+      console.log("Quá trình xử lý That bai!");
+      return { status: false };
+    }
   }
 
   // Chuyển đổi dữ liệu Excel thành PDF
@@ -439,7 +461,7 @@ class fileModel {
           // );
         } catch (error) {
           console.error("Lỗi khi cập nhật is_active:", error);
-          throw error;
+          return { status: false };
         }
       }
 
@@ -457,10 +479,17 @@ class fileModel {
       await user.closeConnection();
 
       // Gọi hàm gửi file sau khi hoàn tất
-      await fileModel.GetFileANDSenFile();
+      const res = await fileModel.GetFileANDSenFile();
+      if (res.status == true) {
+        console.log("Quá trình xử lý hoàn tất!");
+        return { status: true };
+      } else {
+        console.log("Quá trình xử lý That bai!");
+        return { status: false };
+      }
     } catch (error) {
       console.error("Lỗi khi xử lý file:", error);
-      throw error;
+      return { status: false };
     }
   }
 
@@ -500,10 +529,17 @@ class fileModel {
       } finally {
         await user.closeConnection(); // Đóng kết nối
       }
-      await fileModel.GetFileANDSenFile();
+      const res = await fileModel.GetFileANDSenFile();
+      if (res.status == true) {
+        console.log("Quá trình xử lý hoàn tất!");
+        return { status: true };
+      } else {
+        console.log("Quá trình xử lý That bai!");
+        return { status: false };
+      }
     } catch (error) {
       console.error("Lỗi khi xóa người dùng:", error);
-      throw error;
+      return { status: false };
     }
   }
 
@@ -532,10 +568,17 @@ class fileModel {
       } finally {
         await user.closeConnection(); // Đóng kết nối
       }
-      await fileModel.GetFileANDSenFile();
+      const res = await fileModel.GetFileANDSenFile();
+      if (res.status == true) {
+        console.log("Quá trình xử lý hoàn tất!");
+        return { status: true };
+      } else {
+        console.log("Quá trình xử lý That bai!");
+        return { status: false };
+      }
     } catch (error) {
       console.error("Lỗi khi xóa người dùng:", error);
-      throw error;
+      return { status: false };
     }
   }
   static async GetFileANDSenFile() {
@@ -545,10 +588,18 @@ class fileModel {
     try {
       const [result] = await user.connection.execute(param);
       // console.log("🚀 ~ fileModel ~ GetFileANDSenFile ~ result:", result);
-      await fileModel.processFiles(result);
+      const res = await fileModel.processFiles(result);
+      console.log("🚀 ~ fileModel ~ GetFileANDSenFile ~ res:", res);
+      if (res.status == true) {
+        console.log("Quá trình xử lý hoàn tất!");
+        return { status: true };
+      } else {
+        console.log("Quá trình xử lý That bai!");
+        return { status: false };
+      }
     } catch (error) {
       console.error("Lỗi khi xóa người dùng:", error);
-      throw error;
+      return { status: false };
     }
   }
 
@@ -648,15 +699,21 @@ class fileModel {
       });
 
       if (formDataLength > 0) {
-        await fileModel.sendFiles(formData);
+        const res = await fileModel.sendFiles(formData);
+        console.log("🚀 ~ fileModel ~ processFiles ~ res:", res);
+        if (res.status == true) {
+          console.log("Quá trình xử lý hoàn tất!");
+          return { status: true };
+        } else {
+          console.log("Quá trình xử lý That bai!");
+          return { status: false };
+        }
       } else {
         console.log("Không có file nào để gửi.");
       }
-
-      console.log("Quá trình xử lý hoàn tất!");
     } catch (error) {
       console.error("Lỗi trong quá trình xử lý file:", error.message);
-      console.error(error.stack);
+      return { status: false };
     }
   }
 
@@ -667,14 +724,22 @@ class fileModel {
         formData,
         {
           headers: {
-            ...formData.getHeaders() // Lấy headers của FormData
+            ...formData.getHeaders(), // Lấy headers của FormData
+            Authorization: `Bearer ${process.env.API__KEY__AI}`
           }
         }
       );
-
-      console.log("📤 File gửi thành công!", response.data);
+      console.log("🚀 ~ fileModel ~ sendFiles ~ response:", response);
+      if (response.status === 200 || response.status === 201) {
+        console.log("📤 File gửi thành công!", response.data);
+        return { status: true };
+      } else {
+        console.log("📤 File gửi Không thành công!", response.data);
+        return { status: false };
+      }
     } catch (error) {
       console.error("❌ Lỗi khi gửi file:", error.message);
+      return { status: false };
     }
   }
 }

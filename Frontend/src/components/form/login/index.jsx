@@ -8,8 +8,7 @@ import axios from "../../../api/axiosClient";
 import { showNotification } from "../../../func";
 
 export default function Login() {
-  const Navigator = useNavigate();
-  const { isLogin, setIsLogin, setIsRole } = useContext(AuthContext);
+  const { isLogin, isRole, Navigate, Location } = useContext(AuthContext);
 
   const [backendError, setBackendError] = useState({});
   const {
@@ -20,18 +19,16 @@ export default function Login() {
 
   // Kiểm tra trạng thái login khi component được mount
   useEffect(() => {
-    if (isLogin) {
+    if (isLogin && isRole !== null) {
       // Nếu đã login, điều hướng đến trang chủ
-      Navigator("/");
+      Navigate("/");
     }
-  }, [isLogin, Navigator]);
+  }, [isLogin, Location.pathname]);
 
   const loginUser = async (data) => {
     try {
       const response = await axios.post("auth/login", data);
       const dataLogin = response.data;
-      // console.log("🚀 ~ loginUser ~ dataLogin:", dataLogin);
-
       localStorage.setItem(
         "active",
         JSON.stringify({
@@ -39,22 +36,7 @@ export default function Login() {
           dataLogin
         })
       );
-
-      const token = dataLogin.accessToken;
-      const decoded = jwtDecode(token);
-      const { role_id } = decoded;
-
-      // Cập nhật trạng thái login và role vào context
-      setIsLogin(true);
-      setIsRole(role_id);
-
-      // Điều hướng dựa trên role_id
-      if (role_id === 1) {
-        Navigator("/admin");
-      } else {
-        Navigator("/");
-      }
-
+      Navigate("/");
       showNotification("Đăng nhập thành công!", "success");
     } catch (error) {
       if (error.response && error.response.data) {

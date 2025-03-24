@@ -1,10 +1,11 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import axiosClient from "../api/axiosClient";
 import { io } from "socket.io-client";
 import { showNotification } from "../func";
-import { useLocation } from "react-router-dom";
+import { AuthContext } from "./AuthContext.jsx";
+// eslint-disable-next-line react-refresh/only-export-components
 export const ChatContext = createContext({});
-
+// eslint-disable-next-line react/prop-types
 export const AppProvider = ({ children }) => {
   const [isSidebar, setIsSidebar] = useState(true);
   const [message, setMessage] = useState("");
@@ -16,9 +17,9 @@ export const AppProvider = ({ children }) => {
   const [listUser, SetlistUser] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [notification_cont, setNotification_cont] = useState(0);
-  const datass = JSON.parse(localStorage.getItem("active"));
-  const id = datass?.dataLogin?.dataUser?.id;
-  const fakeData = async () => {
+  const { isLogin, dataUser, isRole, Navigate, Location } =
+    useContext(AuthContext);
+  const fakeData = async (id) => {
     try {
       const res = await axiosClient.post("/user/notifications", { id: id });
       const soTb = res.data.Notification.filter((value) => {
@@ -30,15 +31,18 @@ export const AppProvider = ({ children }) => {
       console.log(error);
     }
   };
+  const id = dataUser.id;
   useEffect(() => {
-    fakeData();
-  }, []);
-  const location = useLocation();
+    if (isLogin && isRole !== null) {
+      fakeData(id);
+    } else {
+      Navigate("/login");
+    }
+  }, [Location.pathname]);
+
   const existingRoomId = location.pathname;
   const tachchuoi = existingRoomId.split("/");
-
   const chuoi = tachchuoi[1];
-  // console.log("🚀 ~ AppProvider ~ cuoichuoi:", chuoi);
   useEffect(() => {
     // socket.on("connect", () => {
     //   console.log("⚡ Kết nối socket thành công:", socket.id);
@@ -46,7 +50,7 @@ export const AppProvider = ({ children }) => {
     if (chuoi == "" || chuoi == "c") {
       const socket = io("http://localhost:3000"); // Kết nối với server WebSocket
       socket.on("notificationUpdated", () => {
-        fakeData();
+        fakeData(id);
         showNotification("Có thông báo mới");
       });
       return () => {

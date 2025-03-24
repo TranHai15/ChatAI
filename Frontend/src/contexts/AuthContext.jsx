@@ -1,23 +1,25 @@
 import { createContext, useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode"; // Note: jwt-decode is default export
-
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext({});
 
+// eslint-disable-next-line react/prop-types
 export const AuthAppProvider = ({ children }) => {
   const [isLogin, setIsLogin] = useState(false);
-  const [inforUser, setInforUser] = useState({});
-  const [isRole, setIsRole] = useState(-1);
-  const [isLoading, setIsLoading] = useState(true); // Trạng thái loading
-
+  const [dataUser, setDataUser] = useState({});
+  const [isRole, setIsRole] = useState(null);
+  const [isLoad, setIsLoad] = useState(true); // Trạng thái loading
+  const Navigate = useNavigate();
+  const Location = useLocation();
   useEffect(() => {
     const checkLoginStatus = () => {
       try {
         const activeUser = JSON.parse(localStorage.getItem("active"));
-
         if (activeUser && activeUser.isLogin) {
-          setInforUser(activeUser);
-          setIsLogin(true);
-
+          setIsLogin(activeUser.isLogin);
+          setDataUser(activeUser.dataLogin.dataUser);
           // Decode JWT token để lấy thông tin role
           const token = activeUser.dataLogin?.accessToken;
           if (token) {
@@ -28,22 +30,21 @@ export const AuthAppProvider = ({ children }) => {
         } else {
           // Nếu không tìm thấy người dùng, reset trạng thái
           setIsLogin(false);
-          setInforUser({});
-          setIsRole(-1);
+          setDataUser({});
+          setIsRole(null);
         }
       } catch (error) {
         console.error("Error decoding token:", error);
         setIsLogin(false); // Đảm bảo trạng thái chính xác khi gặp lỗi
       } finally {
-        setIsLoading(false); // Đánh dấu tải xong
+        setIsLoad(false); // Đánh dấu tải xong
       }
     };
 
     checkLoginStatus();
-  }, []);
-
+  }, [Location.pathname]);
   // Nếu đang tải, có thể hiển thị một loading spinner hoặc trạng thái tạm thời
-  if (isLoading) {
+  if (isLoad) {
     return <div>Loading...</div>;
   }
 
@@ -51,11 +52,10 @@ export const AuthAppProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         isLogin,
-        setIsLogin,
-        inforUser,
-        setInforUser,
+        dataUser,
         isRole,
-        setIsRole,
+        Navigate,
+        Location
       }}
     >
       {children}
