@@ -85,7 +85,7 @@ export default function CreateAccount() {
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="grid grid-cols-1 gap-4">
           <div>
-            <label className="block font-medium">Tên</label>
+            <label className="block font-medium">Tài Khoản</label>
             <input
               type="text"
               name="name"
@@ -102,7 +102,7 @@ export default function CreateAccount() {
           </div>
 
           <div>
-            <label className="block font-medium">Full Tên</label>
+            <label className="block font-medium">Họ Và Tên</label>
             <input
               type="text"
               name="username"

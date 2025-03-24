@@ -7,11 +7,10 @@ import axiosClient from "../../../../api/axiosClient";
 export default function Sidebar() {
   const [HistoryChat, setHistoryChat] = useState([]);
   const [NewChatTest, setNewChatTest] = useState([]);
-
+  const { isLogin, dataUser, isRole, Navigate, Location } =
+    useContext(AuthContext);
   const Navigator = useNavigate();
-  const { setIsSidebar, SetMessagesChat, message } = useContext(ChatContext);
-  const { isLogin } = useContext(AuthContext);
-
+  const { setIsSidebar, SetMessagesChat } = useContext(ChatContext);
   const location = useLocation();
   const existingRoomId = location.pathname;
   const tachchuoi = existingRoomId.split("/");
@@ -27,21 +26,23 @@ export default function Sidebar() {
   };
 
   useEffect(() => {
-    const id = cuoichuoi;
-    const roomLoCa = localStorage.getItem("room");
+    if (isLogin && isRole !== null) {
+      const id = cuoichuoi;
+      const roomLoCa = localStorage.getItem("room");
 
-    if (cuoichuoi === roomLoCa) {
-      newchat();
-      localStorage.removeItem("room");
-    } else {
-      // console.log("🚀 ~ useEffect ~ id:", id);
-      if (id) {
-        getOneChat(id);
+      if (cuoichuoi === roomLoCa) {
+        newchat();
+        localStorage.removeItem("room");
+      } else {
+        // console.log("🚀 ~ useEffect ~ id:", id);
+        if (id) {
+          getOneChat(id);
+        }
+        setNewChatTest([]);
       }
-      setNewChatTest([]);
+      getAllChat();
     }
-    getAllChat();
-  }, [existingRoomId]);
+  }, [Location.pathname]);
 
   // useEffect(() => {
   //   getAllChat();

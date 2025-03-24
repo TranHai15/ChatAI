@@ -26,36 +26,36 @@ class User {
   }
 
   // Tạo hàm thêm dữ liệu vào database
-  static async insertUser(username, password, email, role) {
-    const user = new User();
-    await user.connect();
+  // static async insertUser(username, password, email, role) {
+  //   const user = new User();
+  //   await user.connect();
 
-    const insert = `INSERT INTO  users (username, fullname,password, email, phong_ban, role_id, create_at, update_at)  VALUES (?, ?, ?, ?, ?, ?, ?,?)`;
+  //   const insert = `INSERT INTO  users (username, fullname,password, email, phong_ban, role_id, create_at, update_at)  VALUES (?, ?, ?, ?, ?, ?, ?,?)`;
 
-    const create_at = dateTime();
-    console.log("🚀 ~ User ~ insertUser ~ create_at:", create_at);
-    try {
-      const name = "demo";
-      const phong_ban = "demo";
-      const [result] = await user.connection.execute(insert, [
-        name,
-        username,
-        password,
-        email,
-        phong_ban,
-        role,
-        create_at,
-        create_at
-      ]);
-      console.log("User added:", result.insertId);
-      return result.insertId; // Trả về ID của người dùng đã thêm
-    } catch (error) {
-      console.error("Error inserting user:", error);
-      throw error;
-    } finally {
-      await user.closeConnection(); // Đóng kết nối
-    }
-  }
+  //   const create_at = dateTime();
+  //   console.log("🚀 ~ User ~ insertUser ~ create_at:", create_at);
+  //   try {
+  //     const name = "demo";
+  //     const phong_ban = "demo";
+  //     const [result] = await user.connection.execute(insert, [
+  //       name,
+  //       username,
+  //       password,
+  //       email,
+  //       phong_ban,
+  //       role,
+  //       create_at,
+  //       create_at
+  //     ]);
+  //     console.log("User added:", result.insertId);
+  //     return result.insertId; // Trả về ID của người dùng đã thêm
+  //   } catch (error) {
+  //     console.error("Error inserting user:", error);
+  //     throw error;
+  //   } finally {
+  //     await user.closeConnection(); // Đóng kết nối
+  //   }
+  // }
   static async insertUseradmin(name, username, password, role, phong_ban) {
     const user = new User();
     await user.connect();
@@ -116,7 +116,6 @@ class User {
     u.fullname,
     u.username,
     u.role_id,
-    u.email,
     u.phong_ban,
     u.create_at,
     u.update_at,
@@ -144,8 +143,7 @@ LEFT JOIN Roles r ON u.role_id = r.role_id;
 
     const query = `SELECT 
     ch.*, 
-    a.fullname, 
-    a.email
+    a.fullname
 FROM 
     chat_history AS ch
 JOIN 
@@ -198,7 +196,6 @@ ORDER BY
     users.id AS user_id,
     users.username,
     users.fullname,
-    users.email,
     users.phong_ban,
     n.id AS task_id,
     n.task,
