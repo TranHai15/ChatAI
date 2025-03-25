@@ -18,7 +18,7 @@ export default function Header() {
   return (
     <header className="admin-header">
       <div className="logo flex gap-1 items-center" onClick={handleLogout}>
-        <span>Cao Đẳng FPT</span>
+        <span>Vôi Việt</span>
         {/* <img
           className="w-28 bg-transparent"
           src="../../../src/assets/logoFpt.jpg"

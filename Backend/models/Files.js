@@ -705,7 +705,7 @@ class fileModel {
   static async sendFiles(formData) {
     try {
       const response = await axios.post(
-        `${process.env.URL__AI}/upload`,
+        `${process.env.URL__AI}upload`,
         formData,
         {
           headers: {

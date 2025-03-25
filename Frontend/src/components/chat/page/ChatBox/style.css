@@ -91,7 +91,7 @@ table th {
 }
 
 .inputtet::after {
-  content: " Hello Word"; /* Nội dung bạn muốn thêm */
+  content: "Xin chào"; /* Nội dung bạn muốn thêm */
   position: absolute;
   left: 45%;
   top: -200%;

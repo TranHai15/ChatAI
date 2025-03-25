@@ -56,7 +56,7 @@ export default function Header() {
             </div>
           )}
           <div className="logo__title">
-            <h1>BeeAI</h1>
+            <h1>AI_VoiViet</h1>
           </div>
         </div>
 
@@ -89,7 +89,7 @@ export default function Header() {
             </div>
             <div className="flex">
               <div className="thongitnUser">
-                <p>Hello</p>
+                <p>Xin chào</p>
                 <span className="userName">
                   {/* {inforUser.data.dataUser.username} */}
                 </span>
