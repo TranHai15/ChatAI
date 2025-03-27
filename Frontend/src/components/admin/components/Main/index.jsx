@@ -8,6 +8,7 @@ import FileList from "../../page/file";
 import UserProfile from "../../page/account/viewAccount";
 import CreateAccount from "../../page/account/createAccount";
 import Nof from "../../page/nof";
+import DepartmentManagement from "../../page/phongban";
 export default function Main() {
   return (
     <>
@@ -18,6 +19,7 @@ export default function Main() {
         <Route path="/editUser/:id" element={<UserProfile />} />
         <Route path="/create" element={<CreateAccount />} />
         <Route path="/nof" element={<Nof />} />
+        <Route path="/phong" element={<DepartmentManagement />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

@@ -9,16 +9,13 @@ const fileController = {
     if (!req.files || req.files.length === 0) {
       return res.status(400).send({ message: "No files uploaded" });
     }
-
+    const { id_phong_ban } = req.body;
     const id = req.headers["ms"];
     try {
       const mergedFilePath = await fileModel.processFilesAndConvertPDF(
         req.files,
+        id_phong_ban,
         id
-      );
-      console.log(
-        "🚀 ~ uploadAndMergeFiles: ~ mergedFilePath:",
-        mergedFilePath
       );
       if (mergedFilePath.status == true) {
         return res
@@ -115,7 +112,8 @@ const fileController = {
   },
   getFile: async (req, res) => {
     try {
-      const dataFile = await fileModel.getAllFiles();
+      const id = req.params;
+      const dataFile = await fileModel.getAllFiles(id);
       res.status(200).json(dataFile);
     } catch (error) {
       console.log(error);

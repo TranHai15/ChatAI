@@ -82,7 +82,7 @@ class fileModel {
   }
   // console.log("🚀 ~ fileModel ~ version_number:", version_number)
 
-  static async insertFiles(fileName, fileType) {
+  static async insertFiles(fileName, fileType, statusFile) {
     const user = new fileModel();
     await user.connect();
     const insertQuery = `
@@ -94,7 +94,6 @@ class fileModel {
         .toISOString()
         .slice(0, 19)
         .replace("T", " ");
-      const statusFile = 1;
       const [result] = await user.connection.execute(insertQuery, [
         fileName,
         fileType,
@@ -181,8 +180,14 @@ class fileModel {
     }
   }
 
-  static async insertFilesANDFiles(fileName, filePath, fileType, id) {
-    const idNew = await fileModel.insertFiles(fileName, fileType);
+  static async insertFilesANDFiles(
+    fileName,
+    filePath,
+    fileType,
+    statusFile,
+    id
+  ) {
+    const idNew = await fileModel.insertFiles(fileName, fileType, statusFile);
     console.log("🚀 ~ fileModel ~ insertFilesANDFiles ~ idNew:", idNew);
     await fileModel.insertFileDatabase(idNew, filePath, fileType, id);
   }
@@ -229,7 +234,7 @@ class fileModel {
   }
 
   // Xử lý file và chuyển đổi sang PDF
-  static async processFilesAndConvertPDF(files, id) {
+  static async processFilesAndConvertPDF(files, statusFile, id) {
     let txtFiles = [];
 
     let xlsxFiles = [];
@@ -256,6 +261,7 @@ class fileModel {
           file.filename,
           filePath,
           fileExt,
+          statusFile,
           id
         );
       }
@@ -273,6 +279,7 @@ class fileModel {
           file.filename,
           filePath,
           fileExt,
+          statusFile,
           id
         );
       }
@@ -289,6 +296,7 @@ class fileModel {
           file.filename,
           filePath,
           fileExt,
+          statusFile,
           id
         );
       }
@@ -377,9 +385,11 @@ class fileModel {
     await browser.close();
   }
   // Lấy toàn bộ file
-  static async getAllFiles() {
+  static async getAllFiles(id) {
+    console.log("🚀 ~ fileModel ~ getAllFiles ~ id:", id);
     const user = new fileModel();
     await user.connect();
+    const fileId = id.id;
     const query = `SELECT 
     f.id, 
     f.file_name, 
@@ -391,11 +401,11 @@ class fileModel {
     FROM files f
     LEFT JOIN file_versions v ON f.id = v.file_id 
     LEFT JOIN users u ON v.uploaded_by = u.id
-    GROUP BY f.id, f.file_name, f.fileType, f.created_at, u.fullname;
-;
+    WHERE f.statusFile = ?
+    GROUP BY f.id, f.file_name, f.fileType, f.created_at, u.fullname
   `;
     try {
-      const [rows] = await user.connection.execute(query);
+      const [rows] = await user.connection.execute(query, [fileId]);
       return rows; // Trả về tất cả người dùng
     } catch (error) {
       console.error("Không lấy được dữ liệu người dùng:", error);
@@ -570,11 +580,11 @@ class fileModel {
   static async GetFileANDSenFile() {
     const user = new fileModel();
     await user.connect();
-    const param = `Select file_path , file_type  from file_versions where is_active = 1`;
+    const param = `Select fv.file_path , fv.file_type ,f.statusFile  from file_versions fv join files  f on f.id = fv.file_id   where is_active = 1`;
     try {
       const [result] = await user.connection.execute(param);
-      // console.log("🚀 ~ fileModel ~ GetFileANDSenFile ~ result:", result);
-      const res = await fileModel.processFiles(result);
+      const idPhongBan = result[0].statusFile;
+      const res = await fileModel.processFiles(result, idPhongBan);
       if (res.status == true) {
         console.log("Quá trình xử lý hoàn tất!");
         return { status: true };
@@ -588,7 +598,7 @@ class fileModel {
     }
   }
 
-  static async processFiles(filePaths) {
+  static async processFiles(filePaths, idPhongBan) {
     try {
       let txtFiles = [];
       let pdfFiles = [];
@@ -596,13 +606,7 @@ class fileModel {
 
       // Phân loại file theo định dạng
       for (const filePath of filePaths) {
-        // console.log("🚀 ~ fileModel ~ processFiles ~ filePath:", filePath);
         const extname = filePath.file_type.toLowerCase();
-        // console.log(
-        //   "🚀 ~ fileModel ~ processFiles ~ filePath.file_type:",
-        //   filePath.file_type
-        // );
-        // console.log("🚀 ~ fileModel ~ processFiles ~ extname:", extname);
         if (extname === ".txt") {
           txtFiles.push(filePath.file_path);
         } else if (extname === ".pdf") {
@@ -611,65 +615,15 @@ class fileModel {
           xlsxFiles.push(filePath.file_path);
         }
       }
-
-      let combinedPdfPath = null;
-
-      // Xử lý file .txt → chuyển thành PDF
-      if (txtFiles.length > 0) {
-        let combinedData = "";
-
-        for (const filePath of txtFiles) {
-          const data = await fs.promises.readFile(filePath, "utf-8");
-          combinedData += data.trim() + "\n\n";
-        }
-
-        const tempPdfPath = path.join(__dirname, "../temp", "combined_txt.pdf");
-        await fileModel.convertTextToPDF(combinedData, tempPdfPath);
-        combinedPdfPath = tempPdfPath;
-      }
-
-      let finalPdfPath = null;
-
-      // Gộp file PDF nếu có
-      if (pdfFiles.length > 0 || combinedPdfPath) {
-        const pdfDoc = await PDFDocument.create();
-
-        // Gộp các file PDF đầu vào
-        for (const filePath of pdfFiles) {
-          const existingPdfBytes = await fs.promises.readFile(filePath);
-          const existingPdf = await PDFDocument.load(existingPdfBytes);
-          const copiedPages = await pdfDoc.copyPages(
-            existingPdf,
-            existingPdf.getPageIndices()
-          );
-          copiedPages.forEach((page) => pdfDoc.addPage(page));
-        }
-
-        // Nếu có file TXT đã chuyển thành PDF, gộp vào
-        if (combinedPdfPath) {
-          const combinedPdfBytes = await fs.promises.readFile(combinedPdfPath);
-          const combinedPdf = await PDFDocument.load(combinedPdfBytes);
-          const copiedPages = await pdfDoc.copyPages(
-            combinedPdf,
-            combinedPdf.getPageIndices()
-          );
-          copiedPages.forEach((page) => pdfDoc.addPage(page));
-        }
-
-        // Lưu file PDF cuối cùng
-        finalPdfPath = path.join(__dirname, "../final", "final_combined.pdf");
-        const finalPdfBytes = await pdfDoc.save();
-        await fs.promises.writeFile(finalPdfPath, finalPdfBytes);
-      } else if (combinedPdfPath) {
-        finalPdfPath = combinedPdfPath;
-      }
-
       // Tạo formData để gửi file
       const formData = new FormData();
-
-      if (finalPdfPath) {
-        formData.append("file", fs.createReadStream(finalPdfPath));
+      formData.append("Phong_Ban_id", idPhongBan);
+      for (const filePath of pdfFiles) {
+        formData.append("file", fs.createReadStream(filePath));
       }
+      // if (finalPdfPath) {
+      //   formData.append("file", fs.createReadStream(finalPdfPath));
+      // }
 
       for (const filePath of xlsxFiles) {
         formData.append("file", fs.createReadStream(filePath));

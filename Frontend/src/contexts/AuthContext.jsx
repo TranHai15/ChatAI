@@ -10,6 +10,7 @@ export const AuthAppProvider = ({ children }) => {
   const [isLogin, setIsLogin] = useState(false);
   const [dataUser, setDataUser] = useState({});
   const [isRole, setIsRole] = useState(null);
+  const [phongBanID, setPhongBanID] = useState(null);
   const [isLoad, setIsLoad] = useState(true); // Trạng thái loading
   const [token, setToken] = useState(""); // Trạng thái loading
   const Navigate = useNavigate();
@@ -18,9 +19,11 @@ export const AuthAppProvider = ({ children }) => {
     const checkLoginStatus = () => {
       try {
         const activeUser = JSON.parse(localStorage.getItem("active"));
+
         if (activeUser && activeUser.isLogin) {
           setIsLogin(activeUser.isLogin);
           setDataUser(activeUser.dataLogin.dataUser);
+          setPhongBanID(activeUser.dataLogin.dataUser.phong_ban_id);
           // Decode JWT token để lấy thông tin role
           setToken(activeUser.dataLogin?.accessToken);
           if (activeUser.dataLogin?.accessToken) {
@@ -57,7 +60,9 @@ export const AuthAppProvider = ({ children }) => {
         isRole,
         Navigate,
         Location,
-        token
+        token,
+        setIsLogin,
+        phongBanID
       }}
     >
       {children}

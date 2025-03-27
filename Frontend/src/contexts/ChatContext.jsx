@@ -17,6 +17,7 @@ export const AppProvider = ({ children }) => {
   const [listUser, SetlistUser] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [notification_cont, setNotification_cont] = useState(0);
+
   const { isLogin, dataUser, isRole, Navigate, Location } =
     useContext(AuthContext);
   const fakeData = async (id) => {
@@ -31,6 +32,7 @@ export const AppProvider = ({ children }) => {
       console.log(error);
     }
   };
+  const username = dataUser.username;
   const id = dataUser.id;
   useEffect(() => {
     if (isLogin && isRole !== null) {
@@ -44,20 +46,21 @@ export const AppProvider = ({ children }) => {
   const tachchuoi = existingRoomId.split("/");
   const chuoi = tachchuoi[1];
   useEffect(() => {
-    // socket.on("connect", () => {
-    //   console.log("⚡ Kết nối socket thành công:", socket.id);
-    // });
     if (chuoi == "" || chuoi == "c") {
       const socket = io("http://localhost:3000"); // Kết nối với server WebSocket
-      socket.on("notificationUpdated", () => {
+      socket.on("connect", () => {
+        console.log("⚡ Kết nối socket thành công:", socket.id);
+      });
+      socket.on(username, () => {
         fakeData(id);
-        showNotification("Có thông báo mới");
+        showNotification("Có Thông Báo Mới");
       });
       return () => {
-        socket.off("notificationUpdated");
+        socket.off(username);
       };
     }
-  }, []);
+  }, [notification_cont]);
+
   return (
     <ChatContext.Provider
       value={{

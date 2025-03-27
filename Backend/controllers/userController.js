@@ -20,6 +20,18 @@ const dataUser = {
       return res.status(500).json("Lỗi truy vấn dataUser");
     }
   },
+  Department: async (req, res) => {
+    try {
+      const dataAllUser = await User.getDepartment();
+
+      if (!dataAllUser) {
+        return res.status(404).json({ message: "Không tìm thấy người dùng." });
+      }
+      return res.status(200).json(dataAllUser);
+    } catch (error) {
+      return res.status(500).json("Lỗi truy vấn dataUser");
+    }
+  },
   getAllNotification: async (req, res) => {
     try {
       const idUser = req.body.id;
@@ -222,20 +234,29 @@ const dataUser = {
         return res.status(400).json({ message: "Dữ liệu là bắt buộc." });
       }
 
-      // Chèn thông báo vào database
+      // Chèn thông báo vào database và nhận mảng username
       const getChat = await User.insertNof(tasks);
+      console.log("🚀 ~ addNof: ~ getChat:", getChat);
 
-      // Phản hồi thành công
+      // Loại bỏ các giá trị trùng lặp
+      const uniqueUsernames = [...new Set(getChat)];
+      console.log("✅ Danh sách username duy nhất:", uniqueUsernames);
+
+      const io = getSocketIO();
+
+      uniqueUsernames.forEach((username) => {
+        // console.log("🚀 ~ uniqueUsernames.forEach ~ username:", username);
+        io.emit(username, {
+          status: true,
+          message: "Cập nhật thông báo mới"
+        });
+      });
+
       res
         .status(200)
         .json({ success: true, message: "Thêm thông báo thành công." });
 
       // Gửi sự kiện qua Socket.IO cho tất cả người dùng đang kết nối
-      const io = getSocketIO();
-      io.emit("notificationUpdated", {
-        status: true,
-        message: "Cập nhật thông báo mới"
-      });
     } catch (error) {
       res
         .status(500)

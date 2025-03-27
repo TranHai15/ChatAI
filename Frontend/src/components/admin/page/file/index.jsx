@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import axiosClient from "../../../../api/axiosClient";
 import { showNotification } from "../../../../func";
 import LoadingBee from "../../../loading";
 import DownloadAllFiles from "../../../../func/doawload";
+import { AuthContext } from "../../../../contexts/AuthContext";
 
 // Component hiển thị danh sách file
 const FileList = () => {
   const [files, setFiles] = useState([]); // file cha
-  const [filesgoc, setFilesgoc] = useState([]); // file cha
+  // const [filesgoc, setFilesgoc] = useState([]); // file cha
   const [isSaving, setIsSaving] = useState(false); // trạng thái load khi upload
   const [fileDetails, setFileDetails] = useState(null); // Dữ liệu chi tiết của file khi nhấn "View"
   const [fileDetailsID, setFileDetailsID] = useState(null); // Dữ liệu chi tiết của file khi nhấn "View"
@@ -15,22 +16,22 @@ const FileList = () => {
   const [uploadStatus, setUploadStatus] = useState("idle");
   const [verdun, setVerdun] = useState(null);
   const [showDetails, setShowDetails] = useState(false); // Trạng thái hiển thị bảng chi tiết
-  const [showDetailsFile, setShowDetailsFile] = useState(false); // Trạng thái hiển thị bảng chi tiết
+  // const [showDetailsFile, setShowDetailsFile] = useState(false); // Trạng thái hiển thị bảng chi tiết
   const [filesAdd, setFilesAdd] = useState([]);
   const [fileType, setFileType] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
+  const { phongBanID } = useContext(AuthContext);
   // Lấy dữ liệu từ backend
   useEffect(() => {
     fetchFiles();
   }, []);
   const fetchFiles = async () => {
     try {
-      const response = await axiosClient.get("/file"); // API để lấy danh sách file
+      const response = await axiosClient.get(`/file/${phongBanID}`); // API để lấy danh sách file
       const dataNew = response.data.filter((e) => e.statusFile !== 0);
 
-      setFilesgoc(response.data);
+      // setFilesgoc(response.data);
       setFiles(dataNew); // Gán dữ liệu file vào state
     } catch (error) {
       console.error("Error fetching files", error);
@@ -108,6 +109,10 @@ const FileList = () => {
     }
 
     const formData = new FormData();
+    if (phongBanID !== null) {
+      formData.append("id_phong_ban", phongBanID);
+    }
+
     setIsSaving(true);
     // Thêm từng file vào FormData
     Array.from(filesAdd).forEach((file) => {

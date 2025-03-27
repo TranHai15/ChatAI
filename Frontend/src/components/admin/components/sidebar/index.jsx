@@ -50,6 +50,17 @@ export default function Sidebar() {
         </li>
         <li>
           <NavLink
+            to="/admin/phong"
+            end
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            Danh Sách Phòng Ban
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
             to="/admin/nof"
             end
             className={({ isActive }) =>

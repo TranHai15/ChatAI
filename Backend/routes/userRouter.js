@@ -10,6 +10,8 @@ import dataUser from "../controllers/userController.js";
 
 // Lấy toàn bộ người dùng
 router.get("/", dataUser.getAllUsers);
+
+router.get("/department", dataUser.Department);
 //  lấy toàn bộ thông báo
 router.post("/notifications", dataUser.getAllNotification);
 

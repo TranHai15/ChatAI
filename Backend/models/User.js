@@ -60,7 +60,7 @@ class User {
     const user = new User();
     await user.connect();
 
-    const insert = `INSERT INTO  users (username, fullname ,password, phong_ban, role_id, create_at, update_at)  VALUES (?, ?, ?, ?, ?, ?,?)`;
+    const insert = `INSERT INTO  users (username, fullname ,password, phong_ban_id, role_id, create_at, update_at)  VALUES (?, ?, ?, ?, ?, ?,?)`;
 
     const create_at = dateTime();
     console.log("🚀 ~ User ~ insertUser ~ create_at:", create_at);
@@ -116,13 +116,16 @@ class User {
     u.fullname,
     u.username,
     u.role_id,
-    u.phong_ban,
+    p.ten_phong,
+    u.phong_ban_id,
     u.create_at,
     u.update_at,
     r.role_name,
     r.description
 FROM users u
-LEFT JOIN Roles r ON u.role_id = r.role_id;
+LEFT JOIN Roles r ON u.role_id = r.role_id
+Join phong_ban  as p on u.phong_ban_id = p.id
+;
 
 `;
     try {
@@ -130,6 +133,29 @@ LEFT JOIN Roles r ON u.role_id = r.role_id;
       return rows;
     } catch (error) {
       console.error("Không lấy được dữ liệu người dùng:", error);
+      throw error;
+    } finally {
+      await user.closeConnection(); // Đóng kết nối
+    }
+  }
+  static async getDepartment() {
+    const user = new User();
+    await user.connect();
+
+    const query = `SELECT 
+    id, 
+  ten_phong,
+  created_at,
+  updated_at
+FROM 
+    phong_ban 
+ `;
+
+    try {
+      const [rows] = await user.connection.execute(query);
+      return rows; // Trả về tất cả n=
+    } catch (error) {
+      console.error("Không lấy được dữ liệu lich su chat:", error);
       throw error;
     } finally {
       await user.closeConnection(); // Đóng kết nối
@@ -221,13 +247,17 @@ JOIN notifications AS n ON users.id = n.user_id
     const user = new User();
     await user.connect();
 
-    const query = `
+    const insertQuery = `
     INSERT INTO notifications (user_id, task, deadline, status, is_read, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+    // Giả sử bảng users có cột 'username' và 'id' là khóa chính
+    const getUserQuery = `SELECT username FROM users WHERE id = ?`;
 
     try {
-      // Dùng Promise.all để chạy nhiều truy vấn song song
-      await Promise.all(
+      // Dùng Promise.all để chạy các truy vấn song song
+      const usernameResults = await Promise.all(
         tasks.map(async (element) => {
           try {
             const values = [
@@ -239,15 +269,36 @@ JOIN notifications AS n ON users.id = n.user_id
               dateTime(),
               dateTime()
             ];
-            const [result] = await user.connection.execute(query, values);
+            // Thực hiện insert thông báo
+            await user.connection.execute(insertQuery, values);
             console.log(
               `✅ Task inserted: ${element.task} (User ID: ${element.id_user})`
             );
+
+            // Sau đó, truy vấn lấy username tương ứng với user_id
+            const [rows] = await user.connection.execute(getUserQuery, [
+              element.id_user
+            ]);
+            if (rows && rows.length > 0) {
+              console.log(
+                `✅ Username found: ${rows[0].username} for user ID: ${element.id_user}`
+              );
+              return rows[0].username;
+            } else {
+              console.error(
+                `❌ No username found for user ID: ${element.id_user}`
+              );
+              return null;
+            }
           } catch (error) {
-            console.error(`❌ Error inserting task ${element.task}:`, error);
+            console.error(`❌ Error processing task ${element.task}:`, error);
+            return null;
           }
         })
       );
+
+      // Lọc bỏ những giá trị null nếu có
+      return usernameResults.filter((username) => username !== null);
     } catch (error) {
       console.error("🚨 Error inserting notifications:", error);
       throw error;
@@ -593,7 +644,7 @@ GROUP BY a.id;
     const user = new User();
     await user.connect();
     const query = `UPDATE users
-                    SET username = ?, fullname =?, password = ?, phong_ban = ?, role_id = ?, create_at = ? ,update_at = ?
+                    SET username = ?, fullname =?, password = ?, phong_ban_id = ?, role_id = ?, create_at = ? ,update_at = ?
                     WHERE id = ?;
 `;
     try {

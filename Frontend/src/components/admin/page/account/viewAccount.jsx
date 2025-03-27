@@ -46,30 +46,28 @@ const UserProfile = () => {
   const fetchData = async (id) => {
     try {
       const res = await axiosClient.get(`/api/userView/${id}`);
-      console.log("🚀 ~ fetchData ~ res:", res);
       setUserInfo({
         username: res.data[0].username,
         fullname: res.data[0].fullname,
-        password: res.data[0].password,
+        passwordOld: res.data[0].password,
         role: res.data[0].role_id,
-        phong_ban: res.data[0].phong_ban,
+        phong_ban_id: res.data[0].phong_ban_id,
         createdAt: res.data[0].create_at
       });
       setEditedUserInfo({
         username: res.data[0].username,
         fullname: res.data[0].fullname,
-        password: res.data[0].password,
-        oldPassword: res.data[0].password,
+        passwordOld: res.data[0].password,
         role: res.data[0].role_id,
-        phong_ban: res.data[0].phong_ban,
-        createdAt: res.data[0].create_at
+        phong_ban_id: res.data[0].phong_ban_id,
+        createdAt: res.data[0].create_at,
+        passwordNew: ""
       });
       setChatUser(res.data);
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu người dùng:", error);
     }
   };
-
   const [errors, setErrors] = useState({
     username: "",
     password: "",
@@ -118,14 +116,16 @@ const UserProfile = () => {
       formErrors.username = "";
     }
 
-    if (!editedUserInfo.password) {
-      formErrors.password = "Mật khẩu không được để trống!";
-      isValid = false;
-    } else if (editedUserInfo.password.length < 6) {
-      formErrors.password = "Mật khẩu phải có ít nhất 6 ký tự!";
-      isValid = false;
-    } else {
-      formErrors.password = "";
+    if (editedUserInfo.passwordNew.length > 0) {
+      if (!editedUserInfo.passwordNew) {
+        formErrors.passwordNew = "Mật khẩu không được để trống!";
+        isValid = false;
+      } else if (editedUserInfo.passwordNew.length < 6) {
+        formErrors.passwordNew = "Mật khẩu phải có ít nhất 6 ký tự!";
+        isValid = false;
+      } else {
+        formErrors.passwordNew = "";
+      }
     }
 
     if (!editedUserInfo.role) {
@@ -138,7 +138,15 @@ const UserProfile = () => {
     setErrors(formErrors);
     return isValid;
   };
+  const [phongBan, setPhongBan] = useState([]);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const res = await axiosClient.get("/user/department");
+      setPhongBan(res.data);
+    };
 
+    fetchUsers();
+  }, []);
   // Hàm xử lý thay đổi các input
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -152,7 +160,7 @@ const UserProfile = () => {
     try {
       const res = await axiosClient.post(`/user/historyChat`, { id: chatId });
       if (res.status === 200 || res.status === 201) {
-        console.log("🚀 ~ handleViewDetailClick ~ res:", res);
+        // console.log("🚀 ~ handleViewDetailClick ~ res:", res);
         setChatVisible(false);
         setChat(res.data.getChat);
       } else {
@@ -204,17 +212,23 @@ const UserProfile = () => {
           </div>
 
           <div>
-            <label className="block font-medium">Mật khẩu</label>
+            <label className="block font-medium">Mật khẩu Mới</label>
             <input
               type="password"
-              name="password"
-              value={editedUserInfo.password}
+              name="passwordNew"
               onChange={handleInputChange}
               disabled={!isEditing}
               className="mt-1 p-2 w-full border rounded-md"
             />
-            {errors.password && (
-              <div className="text-red-500 text-sm mt-1">{errors.password}</div>
+            <input
+              type="hidden"
+              name="passwordOld"
+              value={editedUserInfo.passwordOld}
+            />
+            {errors.passwordNew && (
+              <div className="text-red-500 text-sm mt-1">
+                {errors.passwordNew}
+              </div>
             )}
           </div>
 
@@ -229,7 +243,7 @@ const UserProfile = () => {
             >
               <option value="1">Admin</option>
               <option value="2">User</option>
-              <option value="3">Khóa tài Khoản</option>
+              {/* <option value="3">Khóa tài Khoản</option> */}
             </select>
             {errors.role && (
               <div className="text-red-500 text-sm mt-1">{errors.role}</div>
@@ -238,14 +252,20 @@ const UserProfile = () => {
 
           <div>
             <label className="block font-medium">Phòng Ban</label>
-            <input
-              type="text"
-              name="phong_ban"
-              value={editedUserInfo.phong_ban}
+
+            <select
+              name="phong_ban_id"
+              value={editedUserInfo.phong_ban_id || userInfo.phong_ban_id}
               onChange={handleInputChange}
               disabled={!isEditing}
               className="mt-1 p-2 w-full border rounded-md"
-            />
+            >
+              {phongBan.map((item, index) => (
+                <option key={index} value={item.id}>
+                  {item.ten_phong}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block font-medium">Ngày tạo</label>

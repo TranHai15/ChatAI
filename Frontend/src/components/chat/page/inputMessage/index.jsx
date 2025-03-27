@@ -15,7 +15,7 @@ export default function InputMessage() {
     setRoomId,
     setIsLoading
   } = useContext(ChatContext);
-  const { isLogin, dataUser, isRole, Navigate, Location } =
+  const { isLogin, dataUser, isRole, Navigate, Location, phongBanID } =
     useContext(AuthContext);
 
   const roomId = useRef(null);
@@ -43,7 +43,8 @@ export default function InputMessage() {
 
   // ham cho du lieu gui ve va them vao db
   const handleResAl = async () => {
-    const { id, fullname, phong_ban, username,role_name,description } = dataUser;
+    const { id, fullname, phong_ban, username, role_name, description } =
+      dataUser;
     const dataMessage = {
       messages: [...MessageChat, { role: "user", content: message }],
       user_info: {
@@ -52,7 +53,8 @@ export default function InputMessage() {
         phong_ban: phong_ban,
         username: username,
         role_name: role_name,
-        description: description
+        description: description,
+        Phong_Ban_id: phongBanID
       }
     };
     try {

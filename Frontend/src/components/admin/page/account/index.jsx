@@ -10,7 +10,7 @@ const Account = () => {
   const [filters, setFilters] = useState({
     name: "",
     email: "",
-    phong_ban: "",
+    ten_phong: "",
     startDate: "",
     endDate: ""
   });
@@ -47,10 +47,10 @@ const Account = () => {
       );
     }
 
-    if (filters.phong_ban.trim()) {
-      const emailSearch = filters.phong_ban.toLowerCase().replace(/\s+/g, "");
+    if (filters.ten_phong.trim()) {
+      const emailSearch = filters.ten_phong.toLowerCase().replace(/\s+/g, "");
       filtered = filtered.filter((user) =>
-        user.phong_ban?.toLowerCase().replace(/\s+/g, "").includes(emailSearch)
+        user.ten_phong?.toLowerCase().replace(/\s+/g, "").includes(emailSearch)
       );
     }
 
@@ -75,7 +75,7 @@ const Account = () => {
     setFilters({
       name: "",
       email: "",
-      phong_ban: "",
+      ten_phong: "",
       startDate: "",
       endDate: ""
     });
@@ -138,9 +138,9 @@ const Account = () => {
             <input
               type="text"
               placeholder="Tìm theo Phòng Ban"
-              value={filters.phong_ban}
+              value={filters.ten_phong}
               onChange={(e) =>
-                setFilters({ ...filters, phong_ban: e.target.value })
+                setFilters({ ...filters, ten_phong: e.target.value })
               }
               className="p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -196,7 +196,7 @@ const Account = () => {
                   <td className="p-3 border max-w-32 overflow-hidden ">
                     {user.fullname}
                   </td>
-                  <td className="p-3 border">{user.phong_ban}</td>
+                  <td className="p-3 border">{user.ten_phong}</td>
 
                   <td className="p-3 border max-w-8 overflow-hidden">
                     {user.role_id === 1 ? "Admin" : "User"}

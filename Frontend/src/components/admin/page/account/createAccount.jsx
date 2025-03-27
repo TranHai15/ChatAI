@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axiosClient from "../../../../api/axiosClient";
 import { useNavigate } from "react-router-dom";
+import { showNotification } from "../../../../func";
 
 export default function CreateAccount() {
   const Navigator = useNavigate();
@@ -9,10 +10,20 @@ export default function CreateAccount() {
     username: "",
     password: "",
     role: "2", // Mặc định là User
-    phong_ban: ""
+    phong_ban: 0
   });
   const [errors, setErrors] = useState({});
   const [error, setError] = useState("");
+  const [phongBan, setPhongBan] = useState([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const res = await axiosClient.get("/user/department");
+      setPhongBan(res.data);
+    };
+
+    fetchUsers();
+  }, []);
 
   // Hàm kiểm tra xác thực từng trường
   const validateForm = () => {
@@ -38,6 +49,10 @@ export default function CreateAccount() {
       formErrors.role = "Quyền không được để trống!";
       isValid = false;
     }
+    if (newUser.phong_ban == 0) {
+      formErrors.phong_ban = "Vui lòng chọn phòng ban!";
+      isValid = false;
+    }
 
     setErrors(formErrors);
     return isValid;
@@ -55,13 +70,14 @@ export default function CreateAccount() {
       try {
         const res = await axiosClient.post("/auth/registerAdmin", newUser);
         if (res.status === 201 || res.status === 200) {
-          alert("Tạo tài khoản thành công!");
+          // alert("Tạo tài khoản thành công!");
+          showNotification("Tạo tài khoản thành công!");
           setNewUser({
             name: "",
             username: "",
             password: "",
             role: "2",
-            phong_ban: ""
+            phong_ban: 0
           });
           Navigator("/admin/users");
         } else {
@@ -77,7 +93,7 @@ export default function CreateAccount() {
       }
     }
   };
-
+  console.log("new", newUser);
   return (
     <div className="container mx-auto p-6 relative">
       <h2 className="text-2xl font-semibold mb-4">Tạo Tài Khoản Mới</h2>
@@ -161,13 +177,31 @@ export default function CreateAccount() {
 
           <div>
             <label className="block font-medium">Phòng Ban</label>
-            <input
+            {/* <input
               type="text"
               name="phong_ban"
               value={newUser.phong_ban}
               onChange={handleInputChange}
               className="mt-1 p-2 w-full border rounded-md"
-            />
+            /> */}
+            <select
+              name="phong_ban"
+              className="w-full border rounded-md p-2 "
+              onChange={handleInputChange}
+            >
+              {" "}
+              <option value={0}>Chọn Phòng Ban</option>
+              {phongBan.map((item, index) => (
+                <option key={index} value={item.id}>
+                  {item.ten_phong}
+                </option>
+              ))}
+            </select>
+            {errors.phong_ban && (
+              <div className="text-red-500 text-sm mt-1">
+                {errors.phong_ban}
+              </div>
+            )}
             {error.phong_ban && (
               <p className="text-red-500 text-sm mt-1">
                 {errors.phong_ban && errors.phong_ban.message}
