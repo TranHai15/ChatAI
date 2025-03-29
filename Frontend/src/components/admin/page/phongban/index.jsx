@@ -1,22 +1,44 @@
 import { useEffect, useState } from "react";
 import axiosClient from "../../../../api/axiosClient";
+import { showNotification } from "../../../../func";
 
 export default function DepartmentManagement() {
   const [departments, setDepartments] = useState([]);
   const [newDepartment, setNewDepartment] = useState("");
   const [editId, setEditId] = useState(null);
   const [editName, setEditName] = useState("");
-
+  const fetchUsers = async () => {
+    const res = await axiosClient.get("/user/department");
+    setDepartments(res.data);
+  };
   useEffect(() => {
-    const fetchUsers = async () => {
-      const res = await axiosClient.get("/user/department");
-      setDepartments(res.data);
-    };
-
     fetchUsers();
   }, []);
+  const addDepartments = async (name) => {
+    const res = await axiosClient.post("/user/department", { name: name });
+    if (res.status === 200 || res.status == 201) {
+      showNotification("Thêm thành công");
+      fetchUsers();
+    }
+  };
+  const deleteDepartments = async (id) => {
+    const res = await axiosClient.delete(`/user/department/${id}`);
+    if (res.status === 200 || res.status == 201) {
+      showNotification("Xóa thành công");
+    }
+  };
+  const updateDepartments = async (id, name) => {
+    const res = await axiosClient.post(`/user/departments`, {
+      id: id,
+      name: name
+    });
+    if (res.status === 200 || res.status == 201) {
+      showNotification("Cập nhật thành công");
+    }
+  };
   const addDepartment = () => {
     if (!newDepartment.trim()) return;
+    addDepartments(newDepartment.trim());
     setDepartments([
       ...departments,
       {
@@ -30,6 +52,7 @@ export default function DepartmentManagement() {
   };
 
   const deleteDepartment = (id) => {
+    deleteDepartments(id);
     setDepartments(departments.filter((dep) => dep.id !== id));
   };
 
@@ -39,6 +62,7 @@ export default function DepartmentManagement() {
   };
 
   const updateDepartment = () => {
+    updateDepartments(editId, editName);
     setDepartments(
       departments.map((dep) =>
         dep.id === editId
@@ -101,19 +125,23 @@ export default function DepartmentManagement() {
                   Lưu
                 </button>
               ) : (
+                !dep.id == 0 && (
+                  <button
+                    className="bg-yellow-500 text-white px-3 py-1 rounded shadow hover:bg-yellow-600"
+                    onClick={() => startEdit(dep.id, dep.ten_phong)}
+                  >
+                    Sửa
+                  </button>
+                )
+              )}
+              {!dep.id == 0 && (
                 <button
-                  className="bg-yellow-500 text-white px-3 py-1 rounded shadow hover:bg-yellow-600"
-                  onClick={() => startEdit(dep.id, dep.ten_phong)}
+                  className="bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
+                  onClick={() => deleteDepartment(dep.id)}
                 >
-                  Sửa
+                  Xóa
                 </button>
               )}
-              <button
-                className="bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600"
-                onClick={() => deleteDepartment(dep.id)}
-              >
-                Xóa
-              </button>
             </div>
           </div>
         ))}

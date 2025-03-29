@@ -161,6 +161,64 @@ FROM
       await user.closeConnection(); // Đóng kết nối
     }
   }
+  static async getDepartments(name) {
+    const user = new User();
+    await user.connect();
+
+    const query = `INSERT INTO phong_ban (ten_phong, created_at, updated_at) VALUES (?,?,?)`;
+
+    try {
+      const created_at = dateTime();
+      const updated_at = dateTime();
+      const [rows] = await user.connection.execute(query, [
+        name,
+        created_at,
+        updated_at
+      ]);
+      return rows; // Trả về tất cả n=
+    } catch (error) {
+      console.error("Không lấy được dữ liệu lich su chat:", error);
+      throw error;
+    } finally {
+      await user.closeConnection(); // Đóng kết nối
+    }
+  }
+  static async deleteDepartments(id) {
+    const user = new User();
+    await user.connect();
+
+    const query = `DELETE FROM phong_ban WHERE id = ?`;
+
+    try {
+      const created_at = dateTime();
+      const updated_at = dateTime();
+      const [rows] = await user.connection.execute(query, [id]);
+      return rows; // Trả về tất cả n=
+    } catch (error) {
+      console.error("Không lấy được dữ liệu lich su chat:", error);
+      throw error;
+    } finally {
+      await user.closeConnection(); // Đóng kết nối
+    }
+  }
+  static async updateDepartments(id, name) {
+    const user = new User();
+    await user.connect();
+
+    const query = `update phong_ban set ten_phong = ? WHERE id = ?`;
+
+    try {
+      const created_at = dateTime();
+      const updated_at = dateTime();
+      const [rows] = await user.connection.execute(query, [name, id]);
+      return rows; // Trả về tất cả n=
+    } catch (error) {
+      console.error("Không lấy được dữ liệu lich su chat:", error);
+      throw error;
+    } finally {
+      await user.closeConnection(); // Đóng kết nối
+    }
+  }
 
   //  lay toan bo lich su chat
   static async getAllChat(id) {

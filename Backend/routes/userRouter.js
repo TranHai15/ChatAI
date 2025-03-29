@@ -12,6 +12,9 @@ import dataUser from "../controllers/userController.js";
 router.get("/", dataUser.getAllUsers);
 
 router.get("/department", dataUser.Department);
+router.post("/department", dataUser.Departments);
+router.delete("/department/:id", dataUser.deleteDepartments);
+router.post("/departments", dataUser.updateDepartments);
 //  lấy toàn bộ thông báo
 router.post("/notifications", dataUser.getAllNotification);
 

@@ -32,6 +32,7 @@ export const AppProvider = ({ children }) => {
       console.log(error);
     }
   };
+
   const username = dataUser.username;
   const id = dataUser.id;
   useEffect(() => {
@@ -47,10 +48,10 @@ export const AppProvider = ({ children }) => {
   const chuoi = tachchuoi[1];
   useEffect(() => {
     if (chuoi == "" || chuoi == "c") {
-      const socket = io("http://localhost:3000"); // Kết nối với server WebSocket
-      socket.on("connect", () => {
-        console.log("⚡ Kết nối socket thành công:", socket.id);
-      });
+      const socket = io(`${import.meta.env.VITE_API_BACKEND}`); // Kết nối với server WebSocket
+      // socket.on("connect", () => {
+      //   console.log("⚡ Kết nối socket thành công:", socket.id);
+      // });
       socket.on(username, () => {
         fakeData(id);
         showNotification("Có Thông Báo Mới");

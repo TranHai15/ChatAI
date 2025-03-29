@@ -54,7 +54,8 @@ export default function InputMessage() {
         username: username,
         role_name: role_name,
         description: description,
-        Phong_Ban_id: phongBanID
+        Phong_Ban_id: phongBanID,
+        Phong_Hanh_Chinh: 0
       }
     };
     try {
@@ -74,8 +75,6 @@ export default function InputMessage() {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
-      let aiResponse = "";
-
       // Đọc luồng dữ liệu từ API AI
       let accumulatedResponse = ""; // Để gom tất cả dữ liệu từ aiResponse
 

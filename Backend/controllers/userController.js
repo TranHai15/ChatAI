@@ -32,6 +32,57 @@ const dataUser = {
       return res.status(500).json("Lỗi truy vấn dataUser");
     }
   },
+  Departments: async (req, res) => {
+    try {
+      const { name } = req.body;
+      console.log("🚀 ~ Departments: ~ name:", name);
+      if (!name) {
+        return res.status(404).json({ message: "Vui long nhap name" });
+      }
+      const dataAllUser = await User.getDepartments(name);
+
+      if (!dataAllUser) {
+        return res.status(404).json({ message: "Không tìm thấy người dùng." });
+      }
+      return res.status(200).json(dataAllUser);
+    } catch (error) {
+      return res.status(500).json("Lỗi truy vấn dataUser");
+    }
+  },
+  deleteDepartments: async (req, res) => {
+    try {
+      const id = req.params;
+      console.log("🚀 ~ Departments: ~ name:", id);
+      if (!id.id) {
+        return res.status(404).json({ message: "Vui long nhap id" });
+      }
+      const dataAllUser = await User.deleteDepartments(id?.id);
+
+      if (!dataAllUser) {
+        return res.status(404).json({ message: "Không tìm thấy người dùng." });
+      }
+      return res.status(200).json(dataAllUser);
+    } catch (error) {
+      return res.status(500).json("Lỗi truy vấn dataUser");
+    }
+  },
+  updateDepartments: async (req, res) => {
+    try {
+      const { id, name } = req.body;
+
+      if (!id || !name) {
+        return res.status(404).json({ message: "Vui long nhap id" });
+      }
+      const dataAllUser = await User.updateDepartments(id, name);
+
+      if (!dataAllUser) {
+        return res.status(404).json({ message: "Không tìm thấy người dùng." });
+      }
+      return res.status(200).json(dataAllUser);
+    } catch (error) {
+      return res.status(500).json("Lỗi truy vấn dataUser");
+    }
+  },
   getAllNotification: async (req, res) => {
     try {
       const idUser = req.body.id;
