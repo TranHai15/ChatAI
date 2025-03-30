@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import axiosClient from "../../../../api/axiosClient";
 import { useNavigate } from "react-router-dom";
 
 import { showNotification } from "../../../../func";
+import { AuthContext } from "../../../../contexts/AuthContext";
 
 const Account = () => {
   const [users, setUsers] = useState([]); // Dữ liệu người dùng
@@ -14,13 +15,17 @@ const Account = () => {
     startDate: "",
     endDate: ""
   });
+  const { isRole, dataUser } = useContext(AuthContext);
   const Navigator = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const res = await axiosClient.get("/user/");
+      const res = await axiosClient.post("/user/", {
+        id: dataUser?.phong_ban_id,
+        role_id: isRole
+      });
       setUsers(res.data);
 
       setFilteredUsers(res.data);
@@ -199,7 +204,11 @@ const Account = () => {
                   <td className="p-3 border">{user.ten_phong}</td>
 
                   <td className="p-3 border max-w-8 overflow-hidden">
-                    {user.role_id === 1 ? "Admin" : "User"}
+                    {user.role_id === 1
+                      ? "Admin"
+                      : user.role_id === 2
+                      ? " User"
+                      : "Trưởng Phòng"}
                   </td>
                   <td className="p-3 border max-w-52 overflow-hidden">
                     {user.create_at}

@@ -4,11 +4,9 @@ import Sidebar from "./components/sidebar/";
 import "./style.css";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode"; // Not
 
 export default function Admin() {
-  const Navigator = useNavigate();
   const { isLogin, isRole, Navigate, Location, token } =
     useContext(AuthContext);
   useEffect(() => {
@@ -18,14 +16,14 @@ export default function Admin() {
           if (token) {
             const decoded = jwtDecode(token);
             const { role_id } = decoded;
-            if (role_id === 1) {
+            if (role_id === 1 || role_id === 3) {
               return;
             } else {
               Navigate("/login");
             }
           }
         } else {
-          Navigator("/login");
+          Navigate("/login");
         }
       } catch (error) {
         console.error("Error decoding token:", error);

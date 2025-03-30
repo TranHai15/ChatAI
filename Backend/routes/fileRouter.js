@@ -60,7 +60,7 @@ router.post(
 
 router.post("/uploadONE", upload.array("files", 1), fileController.insertOne);
 
-router.get("/:id", fileController.getFile);
+router.post("/", fileController.getFile);
 
 // Endpoint lấy file và trả lại dữ liệu để frontend mở
 router.get("/get-file/:id", fileController.getOneFile);

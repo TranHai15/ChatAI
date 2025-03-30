@@ -21,14 +21,17 @@ const FileList = () => {
   const [fileType, setFileType] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const { phongBanID } = useContext(AuthContext);
+  const { isRole, phongBanID } = useContext(AuthContext);
   // Lấy dữ liệu từ backend
   useEffect(() => {
     fetchFiles();
   }, []);
   const fetchFiles = async () => {
     try {
-      const response = await axiosClient.get(`/file/${phongBanID}`); // API để lấy danh sách file
+      const response = await axiosClient.post(`/file/`, {
+        phoneBanId: phongBanID,
+        role_id: isRole
+      }); // API để lấy danh sách file
       const dataNew = response.data.filter((e) => e.statusFile !== 0);
 
       // setFilesgoc(response.data);

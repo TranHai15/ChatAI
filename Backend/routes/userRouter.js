@@ -10,6 +10,8 @@ import dataUser from "../controllers/userController.js";
 
 // Lấy toàn bộ người dùng
 router.get("/", dataUser.getAllUsers);
+router.post("/", dataUser.getAllUsers);
+router.post("/where", dataUser.Whersers);
 
 router.get("/department", dataUser.Department);
 router.post("/department", dataUser.Departments);
@@ -20,7 +22,7 @@ router.post("/notifications", dataUser.getAllNotification);
 
 // Lấy lịch sử chat của người dùng
 router.post("/chat/", dataUser.getAllChat);
-router.get("/nof/", dataUser.getAllNof);
+router.post("/nof/", dataUser.getAllNof);
 router.get("/oneData/:id", dataUser.getOneChat);
 router.post("/historyChat", dataUser.getAllChatByIdRoom);
 

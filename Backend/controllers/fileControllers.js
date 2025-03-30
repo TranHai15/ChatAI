@@ -112,8 +112,13 @@ const fileController = {
   },
   getFile: async (req, res) => {
     try {
-      const id = req.params;
-      const dataFile = await fileModel.getAllFiles(id);
+      const { role_id, phoneBanId } = req.body;
+      console.log("🚀 ~ getFile: ~ role_id:", role_id);
+      console.log("🚀 ~ getFile: ~ phoneBanId:", phoneBanId);
+      if (!role_id || !phoneBanId) {
+        return res.status(400).json("loi khong co id phong lay file");
+      }
+      const dataFile = await fileModel.getAllFiles(phoneBanId, role_id);
       res.status(200).json(dataFile);
     } catch (error) {
       console.log(error);

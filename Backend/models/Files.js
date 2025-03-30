@@ -385,12 +385,11 @@ class fileModel {
     await browser.close();
   }
   // Lấy toàn bộ file
-  static async getAllFiles(id) {
-    console.log("🚀 ~ fileModel ~ getAllFiles ~ id:", id);
+  static async getAllFiles(id, role) {
     const user = new fileModel();
     await user.connect();
-    const fileId = id.id;
-    const query = `SELECT 
+    const fileId = id;
+    let query = `SELECT 
     f.id, 
     f.file_name, 
     f.fileType, 
@@ -400,13 +399,21 @@ class fileModel {
     u.fullname
     FROM files f
     LEFT JOIN file_versions v ON f.id = v.file_id 
-    LEFT JOIN users u ON v.uploaded_by = u.id
-    WHERE f.statusFile = ?
-    GROUP BY f.id, f.file_name, f.fileType, f.created_at, u.fullname
+    LEFT JOIN users u ON v.uploaded_by = u.id  
   `;
+
     try {
-      const [rows] = await user.connection.execute(query, [fileId]);
-      return rows; // Trả về tất cả người dùng
+      if (role == 1) {
+        query +=
+          "GROUP BY f.id, f.file_name, f.fileType, f.created_at, u.fullname";
+        const [rows] = await user.connection.execute(query, [fileId]);
+        return rows; // Trả về tất cả người dùng
+      } else {
+        query +=
+          "WHERE f.statusFile = ? GROUP BY f.id, f.file_name, f.fileType, f.created_at, u.fullname";
+        const [rows] = await user.connection.execute(query, [fileId]);
+        return rows; // Trả về tất cả người dùng
+      }
     } catch (error) {
       console.error("Không lấy được dữ liệu người dùng:", error);
       throw error;

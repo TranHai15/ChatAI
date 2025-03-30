@@ -19,7 +19,6 @@ export const AuthAppProvider = ({ children }) => {
     const checkLoginStatus = () => {
       try {
         const activeUser = JSON.parse(localStorage.getItem("active"));
-
         if (activeUser && activeUser.isLogin) {
           setIsLogin(activeUser.isLogin);
           setDataUser(activeUser.dataLogin.dataUser);
@@ -28,8 +27,8 @@ export const AuthAppProvider = ({ children }) => {
           setToken(activeUser.dataLogin?.accessToken);
           if (activeUser.dataLogin?.accessToken) {
             const decoded = jwtDecode(activeUser.dataLogin?.accessToken);
-            const { role } = decoded;
-            setIsRole(role);
+            const { role_id } = decoded;
+            setIsRole(role_id);
           }
         } else {
           // Nếu không tìm thấy người dùng, reset trạng thái

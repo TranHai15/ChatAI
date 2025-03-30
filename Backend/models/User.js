@@ -108,7 +108,7 @@ class User {
   }
 
   // Lấy toàn bộ người dùng
-  static async getUsers() {
+  static async getUsers(id, role) {
     const user = new User();
     await user.connect();
     const query = `SELECT 
@@ -124,12 +124,29 @@ class User {
     r.description
 FROM users u
 LEFT JOIN Roles r ON u.role_id = r.role_id
-Join phong_ban  as p on u.phong_ban_id = p.id
-;
+JOIN phong_ban p ON u.phong_ban_id = p.id
+WHERE (? = 1)
+   OR (u.phong_ban_id = ? AND u.role_id != 1);
+
 
 `;
     try {
-      const [rows] = await user.connection.execute(query);
+      const [rows] = await user.connection.execute(query, [role, id]);
+      return rows;
+    } catch (error) {
+      console.error("Không lấy được dữ liệu người dùng:", error);
+      throw error;
+    } finally {
+      await user.closeConnection(); // Đóng kết nối
+    }
+  }
+  static async Whersers(id) {
+    const user = new User();
+    await user.connect();
+    const query = `SELECT id FROM users WHERE phong_ban_id = ? AND role_id = 3
+`;
+    try {
+      const [rows] = await user.connection.execute(query, [id]);
       return rows;
     } catch (error) {
       console.error("Không lấy được dữ liệu người dùng:", error);
@@ -272,7 +289,7 @@ ORDER BY
     }
   }
 
-  static async getAllNoffition() {
+  static async getAllNoffition(id) {
     const user = new User();
     await user.connect();
 
@@ -280,7 +297,8 @@ ORDER BY
     users.id AS user_id,
     users.username,
     users.fullname,
-    users.phong_ban,
+    users.phong_ban_id,
+    p.ten_phong,
     n.id AS task_id,
     n.task,
     n.deadline,
@@ -289,10 +307,12 @@ ORDER BY
     n.created_at
 FROM users
 JOIN notifications AS n ON users.id = n.user_id
+Join phong_ban as p on p.id = users.phong_ban_id
+WHERE phong_ban_id = ?
  ORDER BY created_at desc `;
 
     try {
-      const [rows] = await user.connection.execute(query);
+      const [rows] = await user.connection.execute(query, [id]);
       return rows;
     } catch (error) {
       console.error("Không lấy được dữ liệu lich su chat:", error);

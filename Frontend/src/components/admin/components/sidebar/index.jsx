@@ -2,9 +2,12 @@ import { showNotification } from "../../../../func";
 import "./style.css";
 import { NavLink } from "react-router-dom";
 import axiosClient from "../../../../api/axiosClient";
+import { useContext } from "react";
+import { AuthContext } from "../../../../contexts/AuthContext";
+
 export default function Sidebar() {
-  const datass = JSON.parse(localStorage.getItem("active"));
-  const id = datass?.dataLogin?.dataUser?.id;
+  const { isRole, dataUser } = useContext(AuthContext);
+  const id = dataUser?.id;
   const logout = async () => {
     const res = await axiosClient.post("/auth/logout", { id: id });
     if (res.status === 200 || res.status == 201) {
@@ -48,17 +51,19 @@ export default function Sidebar() {
             Danh Sách Người dùng
           </NavLink>
         </li>
-        <li>
-          <NavLink
-            to="/admin/phong"
-            end
-            className={({ isActive }) =>
-              isActive ? "active-link" : "inactive-link"
-            }
-          >
-            Danh Sách Phòng Ban
-          </NavLink>
-        </li>
+        {isRole === 1 && (
+          <li>
+            <NavLink
+              to="/admin/phong"
+              end
+              className={({ isActive }) =>
+                isActive ? "active-link" : "inactive-link"
+              }
+            >
+              Danh Sách Phòng Ban
+            </NavLink>
+          </li>
+        )}
         <li>
           <NavLink
             to="/admin/nof"

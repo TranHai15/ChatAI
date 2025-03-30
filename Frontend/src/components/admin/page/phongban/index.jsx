@@ -52,8 +52,10 @@ export default function DepartmentManagement() {
   };
 
   const deleteDepartment = (id) => {
-    deleteDepartments(id);
-    setDepartments(departments.filter((dep) => dep.id !== id));
+    if (confirm("ban co muon xao khong")) {
+      deleteDepartments(id);
+      setDepartments(departments.filter((dep) => dep.id !== id));
+    }
   };
 
   const startEdit = (id, name) => {

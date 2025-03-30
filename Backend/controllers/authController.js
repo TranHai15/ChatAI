@@ -44,7 +44,7 @@ const authController = {
     try {
       const emailExists = await User.checkEmailExists(username);
       if (emailExists) {
-        return res.status(400).json("Email đã được sử dụng.");
+        return res.status(400).json("Tên đã được sử dụng.");
       }
 
       const salt = await bcryptjs.genSalt(10);

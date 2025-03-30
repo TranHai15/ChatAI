@@ -1,16 +1,20 @@
-import React, { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axiosClient from "../../../../api/axiosClient";
 import { useNavigate } from "react-router-dom";
 import { showNotification } from "../../../../func";
+import { AuthContext } from "../../../../contexts/AuthContext";
 
 export default function CreateAccount() {
+  const { isRole, dataUser } = useContext(AuthContext);
+  const id_phong = dataUser?.phong_ban_id;
+
   const Navigator = useNavigate();
   const [newUser, setNewUser] = useState({
     name: "",
     username: "",
     password: "",
     role: "2", // Mặc định là User
-    phong_ban: 0
+    phong_ban: null
   });
   const [errors, setErrors] = useState({});
   const [error, setError] = useState("");
@@ -26,7 +30,7 @@ export default function CreateAccount() {
   }, []);
 
   // Hàm kiểm tra xác thực từng trường
-  const validateForm = () => {
+  const validateForm = async () => {
     let formErrors = {};
     let isValid = true;
 
@@ -45,17 +49,39 @@ export default function CreateAccount() {
       formErrors.password = "Mật khẩu phải có ít nhất 6 ký tự!";
       isValid = false;
     }
+
+    if (isRole === 1) {
+      if (newUser.phong_ban == null) {
+        formErrors.phong_ban = "Vui lòng chọn phòng ban!";
+        isValid = false;
+      }
+      isValid = false;
+    }
     if (!newUser.role) {
       formErrors.role = "Quyền không được để trống!";
       isValid = false;
-    }
-    if (newUser.phong_ban == 0) {
-      formErrors.phong_ban = "Vui lòng chọn phòng ban!";
-      isValid = false;
+    } else {
+      if (newUser.role == 3) {
+        const kq = await whereAccount(newUser.phong_ban);
+
+        if (!kq) {
+          showNotification("Đã có tài khoản trưởng phòng rồi", "error");
+        }
+        isValid = kq;
+      }
     }
 
     setErrors(formErrors);
     return isValid;
+  };
+
+  const whereAccount = async (id) => {
+    const res = await axiosClient.post("/user/where", { id: id });
+    if (res.data.length > 0) {
+      return false;
+    } else {
+      return true;
+    }
   };
 
   // Hàm xử lý thay đổi các input
@@ -66,8 +92,14 @@ export default function CreateAccount() {
 
   // Hàm xử lý khi nhấn nút tạo tài khoản
   const handleCreateAccount = async () => {
-    if (validateForm()) {
+    const kq = await validateForm();
+    console.log("🚀 ~ handleCreateAccount ~ kq:", kq);
+    if (kq) {
       try {
+        if (isRole !== 1) {
+          newUser.phong_ban = id_phong;
+        }
+
         const res = await axiosClient.post("/auth/registerAdmin", newUser);
         if (res.status === 201 || res.status === 200) {
           // alert("Tạo tài khoản thành công!");
@@ -77,7 +109,7 @@ export default function CreateAccount() {
             username: "",
             password: "",
             role: "2",
-            phong_ban: 0
+            phong_ban: 9999
           });
           Navigator("/admin/users");
         } else {
@@ -90,10 +122,11 @@ export default function CreateAccount() {
             ? error.response.data
             : "Don't have response from server"
         );
+        console.log("error.response.data", error.response.data);
       }
     }
   };
-  console.log("new", newUser);
+
   return (
     <div className="container mx-auto p-6 relative">
       <h2 className="text-2xl font-semibold mb-4">Tạo Tài Khoản Mới</h2>
@@ -129,11 +162,7 @@ export default function CreateAccount() {
             {errors.username && (
               <div className="text-red-500 text-sm mt-1">{errors.username}</div>
             )}
-            {error.username && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.username.message}
-              </p>
-            )}
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
           </div>
 
           <div>
@@ -157,16 +186,27 @@ export default function CreateAccount() {
 
           <div>
             <label className="block font-medium">Quyền</label>
-            <select
-              name="role"
-              value={newUser.role}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-full border rounded-md"
-            >
-              <option value="1">Admin</option>
-              <option value="2">User</option>
-              <option value="3">Khóa tài khoản</option>
-            </select>
+            {isRole !== 1 ? (
+              <select
+                name="role"
+                value={newUser.role}
+                onChange={handleInputChange}
+                className="mt-1 p-2 w-full border rounded-md"
+              >
+                <option value="2">User</option>
+              </select>
+            ) : (
+              <select
+                name="role"
+                value={newUser.role}
+                onChange={handleInputChange}
+                className="mt-1 p-2 w-full border rounded-md"
+              >
+                <option value="1">Admin</option>
+                <option value="2">User</option>
+                <option value="3">Trưởng phòng</option>
+              </select>
+            )}
             {errors.role && (
               <div className="text-red-500 text-sm mt-1">{errors.role}</div>
             )}
@@ -177,26 +217,42 @@ export default function CreateAccount() {
 
           <div>
             <label className="block font-medium">Phòng Ban</label>
-            {/* <input
-              type="text"
-              name="phong_ban"
-              value={newUser.phong_ban}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-full border rounded-md"
-            /> */}
-            <select
-              name="phong_ban"
-              className="w-full border rounded-md p-2 "
-              onChange={handleInputChange}
-            >
-              {" "}
-              <option value={0}>Chọn Phòng Ban</option>
-              {phongBan.map((item, index) => (
-                <option key={index} value={item.id}>
-                  {item.ten_phong}
-                </option>
-              ))}
-            </select>
+
+            {isRole !== 1 ? (
+              phongBan.map((item, index) => {
+                if (id_phong == item.id) {
+                  return (
+                    <div key={index}>
+                      <input
+                        type="text"
+                        value={item.ten_phong}
+                        disabled
+                        className="mt-1 p-2 w-full border rounded-md"
+                      />
+                      <input
+                        type="hidden"
+                        name="phong_ban"
+                        value={id_phong}
+                        className="mt-1 p-2 w-full border rounded-md"
+                      />
+                    </div>
+                  );
+                }
+              })
+            ) : (
+              <select
+                name="phong_ban"
+                className="w-full border rounded-md p-2 "
+                onChange={handleInputChange}
+              >
+                <option value={null}>Chọn Phòng Ban</option>
+                {phongBan.map((item, index) => (
+                  <option key={index} value={item.id}>
+                    {item.ten_phong}
+                  </option>
+                ))}
+              </select>
+            )}
             {errors.phong_ban && (
               <div className="text-red-500 text-sm mt-1">
                 {errors.phong_ban}

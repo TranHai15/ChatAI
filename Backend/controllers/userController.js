@@ -6,11 +6,27 @@ import { setupSocket, getSocketIO } from "../socket.js"; // Import file Socket.i
 const dataUser = {
   getAllUsers: async (req, res) => {
     try {
-      const { user_id, deadline, task } = req.body;
-      // console.log("🚀 ~ getAllUsers: ~ user_id:", user_id);
-      // console.log("🚀 ~ getAllUsers: ~ task:", task);
-      // console.log("🚀 ~ getAllUsers: ~ deadline:", deadline);
-      const dataAllUser = await User.getUsers();
+      const { id, role_id } = req.body;
+      if (!id) {
+        return res.status(404).json({ message: "Không tìm thấy người dùng." });
+      }
+      const dataAllUser = await User.getUsers(id, role_id);
+
+      if (!dataAllUser) {
+        return res.status(404).json({ message: "Không tìm thấy người dùng." });
+      }
+      return res.status(200).json(dataAllUser);
+    } catch (error) {
+      return res.status(500).json("Lỗi truy vấn dataUser");
+    }
+  },
+  Whersers: async (req, res) => {
+    try {
+      const { id } = req.body;
+      if (!id) {
+        return res.status(404).json({ message: "Không tìm thấy người dùng." });
+      }
+      const dataAllUser = await User.Whersers(id);
 
       if (!dataAllUser) {
         return res.status(404).json({ message: "Không tìm thấy người dùng." });
@@ -141,7 +157,11 @@ const dataUser = {
   },
   getAllNof: async (req, res) => {
     try {
-      const getChat = await User.getAllNoffition();
+      const { id } = req.body;
+      if (!id) {
+        return res.status(400).json("ID người dùng là bắt buộc."); // Kiểm tra ID
+      }
+      const getChat = await User.getAllNoffition(id);
       // console.log("message: Lay thành công");
       return res.status(200).json({ getChat });
     } catch (error) {

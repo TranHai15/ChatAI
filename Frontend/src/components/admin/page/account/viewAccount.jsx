@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axiosClient from "../../../../api/axiosClient";
 import { showNotification } from "../../../../func";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm"; // Import remark-gfm
+import { AuthContext } from "../../../../contexts/AuthContext";
 
 const UserProfile = () => {
-  const Navigator = useNavigate();
+  const { isRole } = useContext(AuthContext);
   // State để quản lý thông tin người dùng và trạng thái chỉnh sửa
   const [isEditing, setIsEditing] = useState(false);
   const [chat, setChat] = useState([]);
@@ -232,41 +233,44 @@ const UserProfile = () => {
             )}
           </div>
 
-          <div>
-            <label className="block font-medium">Quyền</label>
-            <select
-              name="role"
-              value={editedUserInfo.role || userInfo.role}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className="mt-1 p-2 w-full border rounded-md"
-            >
-              <option value="1">Admin</option>
-              <option value="2">User</option>
-              {/* <option value="3">Khóa tài Khoản</option> */}
-            </select>
-            {errors.role && (
-              <div className="text-red-500 text-sm mt-1">{errors.role}</div>
-            )}
-          </div>
+          {isRole === 1 && (
+            <div>
+              <div>
+                <label className="block font-medium">Quyền</label>
+                <select
+                  name="role"
+                  value={editedUserInfo.role || userInfo.role}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  className="mt-1 p-2 w-full border rounded-md"
+                >
+                  <option value="1">Admin</option>
+                  <option value="2">User</option>
+                  <option value="3">Trưởng phòng</option>
+                </select>
+                {errors.role && (
+                  <div className="text-red-500 text-sm mt-1">{errors.role}</div>
+                )}
+              </div>
 
-          <div>
-            <label className="block font-medium">Phòng Ban</label>
-
-            <select
-              name="phong_ban_id"
-              value={editedUserInfo.phong_ban_id || userInfo.phong_ban_id}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className="mt-1 p-2 w-full border rounded-md"
-            >
-              {phongBan.map((item, index) => (
-                <option key={index} value={item.id}>
-                  {item.ten_phong}
-                </option>
-              ))}
-            </select>
-          </div>
+              <div>
+                <label className="block font-medium">Phòng Ban</label>
+                <select
+                  name="phong_ban_id"
+                  value={editedUserInfo.phong_ban_id || userInfo.phong_ban_id}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  className="mt-1 p-2 w-full border rounded-md"
+                >
+                  {phongBan.map((item, index) => (
+                    <option key={index} value={item.id}>
+                      {item.ten_phong}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
           <div>
             <label className="block font-medium">Ngày tạo</label>
             <input
