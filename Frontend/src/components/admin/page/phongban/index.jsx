@@ -59,8 +59,10 @@ export default function DepartmentManagement() {
   };
 
   const startEdit = (id, name) => {
-    setEditId(id);
-    setEditName(name);
+      setEditId(id);
+      setEditName(name);
+    
+
   };
 
   const updateDepartment = () => {

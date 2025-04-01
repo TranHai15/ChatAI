@@ -22,6 +22,7 @@ const FileList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const { isRole, phongBanID } = useContext(AuthContext);
+  console.log('role',isRole);
   // Lấy dữ liệu từ backend
   useEffect(() => {
     fetchFiles();
@@ -281,8 +282,8 @@ const FileList = () => {
         <LoadingBee />
       ) : (
         <div>
-          <DownloadAllFiles />
-          <div className="flex justify-end w-full">
+          {/* <DownloadAllFiles /> */}
+      {isRole !== 1 && (    <div className="flex justify-end w-full">
             <div className="flex flex-col items-center space-y-4 ml-auto w-full ">
               <div className="relative w-full flex justify-end">
                 <input
@@ -353,7 +354,7 @@ const FileList = () => {
                 </button>
               )}
             </div>
-          </div>
+          </div>)}
           <input
             id="fileInput"
             type="file"
@@ -401,7 +402,7 @@ const FileList = () => {
                           src="../../../../src/assets/view.svg"
                         />
                       </button>
-                      <button
+                  {isRole !== 1 && (    <button
                         onClick={() => handleDeleteFile(file.id)}
                         className=" text-white py-1 px-3 rounded hover:bg-red-600"
                       >
@@ -409,7 +410,7 @@ const FileList = () => {
                           className="w-4"
                           src="../../../../src/assets/anfile.svg"
                         />
-                      </button>
+                      </button>)}
                     </>
                   </td>
                 </tr>
@@ -448,45 +449,50 @@ const FileList = () => {
                             <td className="border px-4 py-2">
                               {new Date(file.uploaded_at).toLocaleString()}
                             </td>
-                            <td className="flex gap-2">
+                            {            
+                            
+                            isRole !== 1 && ( <td className="flex gap-2">
                               <button
-                                onClick={() =>
-                                  handleDownload(file.file_path, file.file_type)
-                                }
-                                className="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600"
-                              >
-                                <img
-                                  className="w-4"
-                                  src="../../../../src/assets/download.svg"
-                                />
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleDeleteOne(file.id, file.is_active)
-                                }
-                                className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600"
-                              >
-                                <img
-                                  className="w-4"
-                                  src="../../../../src/assets/delete.svg"
-                                />
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleCheck(file.id, file.is_active)
-                                }
-                                className={`py-1 px-3 rounded hover:bg-red-600 ${
-                                  file.is_active == 1
-                                    ? "bg-blue-500"
-                                    : "bg-blue-100"
-                                }`}
-                              >
-                                <img
-                                  className="w-4"
-                                  src="../../../../src/assets/check.svg"
-                                />
-                              </button>
-                            </td>
+                               onClick={() =>
+                                 handleDownload(file.file_path, file.file_type)
+                               }
+                               className="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600"
+                             >
+                               <img
+                                 className="w-4"
+                                 src="../../../../src/assets/download.svg"
+                               />
+                             </button>
+                             <button
+                               onClick={() =>
+                                 handleDeleteOne(file.id, file.is_active)
+                               }
+                               className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600"
+                             >
+                               <img
+                                 className="w-4"
+                                 src="../../../../src/assets/delete.svg"
+                               />
+                             </button>
+                             <button
+                               onClick={() =>
+                                 handleCheck(file.id, file.is_active)
+                               }
+                               className={`py-1 px-3 rounded hover:bg-red-600 ${
+                                 file.is_active == 1
+                                   ? "bg-blue-500"
+                                   : "bg-blue-100"
+                               }`}
+                             >
+                               <img
+                                 className="w-4"
+                                 src="../../../../src/assets/check.svg"
+                               />
+                             </button>
+                             
+                             </td>)
+                            }
+                           
                           </tr>
                         ))}
                       </tbody>
@@ -541,21 +547,16 @@ const FileList = () => {
                         <p>File đã được tải lên!</p>
                       )}
                     </div>
-                    {!file && (
-                      <button
-                        onClick={() => handleImport(fileDetailsID)}
-                        className="bg-green-200 text-white py-2 px-4 rounded   hover:bg-green-500 mt-4 flex gap-2 items-center "
-                      >
-                        <span className="font-extrabold text-black">
-                          {" "}
-                          Import
-                        </span>
-                        <img
-                          className="w-3"
-                          src="../../../../src/assets/save.svg"
-                        />
-                      </button>
-                    )}
+                    {!file && isRole !== 1 && (
+  <button
+    onClick={() => handleImport(fileDetailsID)}
+    className="bg-green-200 text-white py-2 px-4 rounded hover:bg-green-500 mt-4 flex gap-2 items-center"
+  >
+    <span className="font-extrabold text-black">Import</span>
+    <img className="w-3" src="../../../../src/assets/save.svg" />
+  </button>
+)}
+
                   </div>
                 </div>
               </div>
